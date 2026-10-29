@@ -104,13 +104,18 @@ class ChannelStore(models.Model):
             "client_order_ref": data.get("name"),
             "date_order": parse_datetime(data.get("date")),
             "company_id": self.company_id.id,
-            "warehouse_id": self.warehouse_id.id,
+            "warehouse_id": (
+                (self.fulfilled_warehouse_id or self.warehouse_id)
+                if data.get("channel_fulfilled")
+                else self.warehouse_id
+            ).id,
             "team_id": self.team_id.id,
             "note": data.get("note") or False,
             "order_line": [Command.create(line) for line in lines],
         }
         if pricelist:
             vals["pricelist_id"] = pricelist.id
+        vals.update(self._order_extra_vals(data))
         order = self.env["sale.order"].with_company(self.company_id).create(vals)
         if data.get("note"):
             order.message_post(body=_("Customer note: %s", data["note"]))
@@ -119,6 +124,8 @@ class ChannelStore(models.Model):
     def _update_existing_order(self, order, data, new=False):
         """Apply status changes coming from the channel to an Odoo order."""
         self.ensure_one()
+        if new and data.get("channel_fulfilled") and not data.get("cancelled"):
+            self._deliver_channel_fulfilled(order)
         if new and not data.get("cancelled"):
             workflow = self._find_workflow(data.get("gateways"))
             if workflow:
@@ -138,6 +145,12 @@ class ChannelStore(models.Model):
             self._cancel_order(order)
         for refund in data.get("refunds") or []:
             self._process_refund(order, refund)
+
+    def _deliver_channel_fulfilled(self, order):
+        """The channel already shipped this order: confirm it and book the delivery, no shipment is sent back."""
+        if order.state in ("draft", "sent"):
+            order.action_confirm()
+        self.env["channel.workflow"]._validate_pickings(order, skip_fulfillment_push=True)
 
     def _cancel_order(self, order):
         done_pickings = order.picking_ids.filtered(lambda p: p.state == "done")
@@ -206,6 +219,9 @@ class ChannelStore(models.Model):
         if country and address.get("state_code"):
             state = state.search(
                 [("country_id", "=", country.id), ("code", "=ilike", address["state_code"])],
+                limit=1,
+            ) or state.search(
+                [("country_id", "=", country.id), ("name", "=ilike", address["state_code"])],
                 limit=1,
             )
         return {
@@ -311,15 +327,16 @@ class ChannelStore(models.Model):
             rate = float(tax_line.get("rate") or 0.0)
             if float_is_zero(rate, precision_digits=4):
                 continue
-            tax = self.env["account.tax"].search(
+            candidates = self.env["account.tax"].search(
                 [
                     ("type_tax_use", "=", "sale"),
                     ("amount_type", "=", "percent"),
                     ("amount", "=", rate),
                     ("company_id", "=", self.company_id.id),
-                ],
-                limit=1,
+                ]
             )
+            # a tax-excluded twin wins over a tax-included one
+            tax = candidates.sorted(lambda t: (t.price_include, t.sequence, t.id))[:1]
             taxes |= tax
         return taxes
 

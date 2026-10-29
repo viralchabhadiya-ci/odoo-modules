@@ -59,20 +59,22 @@ class ChannelSetupWizard(models.TransientModel):
             "target": "new",
         }
 
+    def _prepare_store_vals(self):
+        """Connectors with extra credentials extend this."""
+        return {
+            "name": self.name,
+            "channel_type": self.channel_type,
+            "company_id": self.company_id.id,
+            "shop_url": self.shop_url,
+            "api_key": self.api_key,
+            "api_secret": self.api_secret,
+            "access_token": self.access_token,
+            "webhook_secret": self.webhook_secret,
+        }
+
     def action_connect(self):
         self.ensure_one()
-        store = self.env["channel.store"].create(
-            {
-                "name": self.name,
-                "channel_type": self.channel_type,
-                "company_id": self.company_id.id,
-                "shop_url": self.shop_url,
-                "api_key": self.api_key,
-                "api_secret": self.api_secret,
-                "access_token": self.access_token,
-                "webhook_secret": self.webhook_secret,
-            }
-        )
+        store = self.env["channel.store"].create(self._prepare_store_vals())
         # an error here rolls the store back, so a typo never leaves a half set up shop behind
         shop_name = store._test_connection()
         store.write({"state": "connected", "connection_message": _("Connected to %s", shop_name)})
@@ -119,16 +121,17 @@ class ChannelSetupWizard(models.TransientModel):
                     }
                 )
             ]
-        try:
-            store._register_webhooks()
-            store.webhooks_registered = True
-        except UserError as exc:
-            store.message_post(
-                body=_(
-                    "Webhooks could not be registered (%s). Orders will still arrive every 15 minutes.",
-                    exc.args[0] if exc.args else exc,
+        if store.supports_webhooks:
+            try:
+                store._register_webhooks()
+                store.webhooks_registered = True
+            except UserError as exc:
+                store.message_post(
+                    body=_(
+                        "Webhooks could not be registered (%s). Orders will still arrive every 15 minutes.",
+                        exc.args[0] if exc.args else exc,
+                    )
                 )
-            )
         if self.import_products:
             store._import_products()
         store._import_orders()

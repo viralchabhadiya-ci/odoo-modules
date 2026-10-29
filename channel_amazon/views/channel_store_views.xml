@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="channel_store_view_form_amazon" model="ir.ui.view">
+        <field name="name">channel.store.form.amazon</field>
+        <field name="model">channel.store</field>
+        <field name="inherit_id" ref="channel_connector_base.channel_store_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='connection']" position="inside">
+                <group string="Amazon" invisible="channel_type != 'amazon'">
+                    <group>
+                        <field name="amazon_region"/>
+                        <field name="amazon_seller_id"/>
+                        <field name="amazon_refresh_token" password="True" groups="channel_connector_base.group_channel_manager"/>
+                    </group>
+                    <group>
+                        <field name="amazon_marketplace_names"/>
+                        <field name="amazon_marketplace_ids"/>
+                    </group>
+                </group>
+            </xpath>
+            <xpath expr="//group[@name='shipments']" position="inside">
+                <field name="fulfilled_warehouse_id" invisible="channel_type != 'amazon'"/>
+                <div class="text-muted" colspan="2" invisible="channel_type != 'amazon'">
+                    Orders Amazon ships itself (FBA) are taken from this warehouse and marked as delivered. Keep the stock of
+                    this warehouse in line with your Amazon FBA inventory. Without a warehouse here they use the store warehouse.
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>
