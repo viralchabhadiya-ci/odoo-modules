@@ -106,3 +106,19 @@ Where we beat the field:
 3. Lines of old listings without SKU still import (product found or created from the order line).
 4. Refunds become credit notes, by line when a whole line was refunded.
 5. Stock refusals are named; a dead refresh token says how long they last and how to renew.
+
+## Magento 2 (added 2026-10-29)
+
+Competitors (Odoo 19 listings): Webkul $199 (MSI and multi-store only through paid extensions), VentorTech Connector PRO
+$582 (configurable products, MSI, queues; some real-time flows need a Magento extension), Emipro $625 (MSI, refunds and
+credit notes, webhooks), Odoo IN $199 (SKU mapping, admin token), SDLC (price on request, multi-store, queues).
+Typical gaps: extra Magento-side modules for live sync, paid extensions for MSI, one purchase per Odoo version.
+
+What we build against: REST `/rest/{store_code}/V1` with an integration token; `orders` and `creditmemos` searched by
+`updated_at`/`created_at`; MSI `inventory/source-items` (legacy `stockItems/1` when MSI is off); `order/{id}/ship`.
+Where we beat the field:
+1. Nothing to install in Magento; MSI sources become Odoo locations automatically.
+2. Configurable products are booked as the chosen variant, with discount, shipping tax and shipping discount.
+3. Credit memos become credit notes for the returned quantity only, even when the order itself did not change.
+4. One unknown SKU no longer fails a whole stock batch: it is found by retrying one by one and named.
+5. Missing API permissions are named in plain words (which resource) instead of "not authorized".
