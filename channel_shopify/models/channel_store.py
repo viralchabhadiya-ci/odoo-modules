@@ -229,37 +229,22 @@ class ChannelStore(models.Model):
 
     # -- connection ---------------------------------------------------------------
 
-    def _test_connection(self):
+    def _shopify_test_connection(self):
         self.ensure_one()
         data = self._shopify().graphql(SHOP_QUERY)
         self.shop_url = normalize_shop(self.shop_url)
-        self._sync_locations(data["locations"]["nodes"])
+        self._sync_locations(
+            [
+                {"external_id": str(n["legacyResourceId"]), "name": n["name"]}
+                for n in data["locations"]["nodes"]
+                if n.get("isActive")
+            ]
+        )
         return data["shop"]["name"]
-
-    def _sync_locations(self, nodes):
-        existing = {l.external_id: l for l in self.location_ids}
-        first_free = not self.location_ids.filtered("warehouse_id")
-        for node in nodes:
-            if not node.get("isActive"):
-                continue
-            external_id = str(node["legacyResourceId"])
-            if external_id in existing:
-                existing[external_id].name = node["name"]
-                continue
-            self.env["channel.location"].create(
-                {
-                    "store_id": self.id,
-                    "name": node["name"],
-                    "external_id": external_id,
-                    # one location gets the default warehouse; mapping several to it would count the stock twice
-                    "warehouse_id": self.warehouse_id.id if first_free else False,
-                }
-            )
-            first_free = False
 
     # -- webhooks -----------------------------------------------------------------
 
-    def _register_webhooks(self):
+    def _shopify_register_webhooks(self):
         self.ensure_one()
         client = self._shopify()
         if not self.webhook_url.startswith("https://"):
@@ -274,7 +259,7 @@ class ChannelStore(models.Model):
                     continue
                 raise
 
-    def _verify_webhook(self, body, headers):
+    def _shopify_verify_webhook(self, body, headers):
         secret = (self.sudo().api_secret or "").encode()
         received = headers.get("X-Shopify-Hmac-Sha256", "")
         if not secret or not received:
@@ -282,7 +267,7 @@ class ChannelStore(models.Model):
         digest = base64.b64encode(hmac.new(secret, body, hashlib.sha256).digest()).decode()
         return hmac.compare_digest(digest, received)
 
-    def _parse_webhook(self, body, headers):
+    def _shopify_parse_webhook(self, body, headers):
         topic = headers.get("X-Shopify-Topic", "")
         payload = json.loads(body or b"{}")
         if topic in ("orders/create", "orders/updated", "orders/cancelled"):
@@ -306,7 +291,7 @@ class ChannelStore(models.Model):
 
     # -- orders & products ----------------------------------------------------------
 
-    def _fetch_orders(self, since):
+    def _shopify_fetch_orders(self, since):
         self.ensure_one()
         since_iso = fields.Datetime.to_datetime(since).strftime("%Y-%m-%dT%H:%M:%SZ")
         for node in self._shopify().paginate(
@@ -314,17 +299,17 @@ class ChannelStore(models.Model):
         ):
             yield normalize_order(node)
 
-    def _fetch_order(self, external_id):
+    def _shopify_fetch_order(self, external_id):
         node = self._shopify().graphql(ORDER_QUERY, {"id": external_id})["order"]
         return normalize_order(node) if node else None
 
-    def _fetch_products(self):
+    def _shopify_fetch_products(self):
         for node in self._shopify().paginate(PRODUCTS_QUERY, "products", first=25):
             yield normalize_product(node)
 
     # -- stock ----------------------------------------------------------------------
 
-    def _push_stock_levels(self, items):
+    def _shopify_push_stock_levels(self, items):
         client = self._shopify()
         quantities = [
             {
@@ -343,7 +328,7 @@ class ChannelStore(models.Model):
 
     # -- shipments ------------------------------------------------------------------
 
-    def _push_fulfillment(self, picking):
+    def _shopify_push_fulfillment(self, picking):
         order = picking.sale_id
         client = self._shopify()
         graphql_id = f"gid://shopify/Order/{order.channel_order_id}"

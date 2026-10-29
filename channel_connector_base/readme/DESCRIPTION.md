@@ -20,8 +20,8 @@ The engine behind every sales-channel connector. On its own it connects nothing;
 
 ## For connector authors
 
-Subclass `channel.store` with `selection_add` on `channel_type` and implement the hooks at the bottom of
-`models/channel_store.py`:
+Subclass `channel.store` with `selection_add` on `channel_type` and implement the hooks below, named
+`_<channel_type>_<hook>` (for example `_shopify_fetch_orders`), so several connectors can live side by side:
 
 | Hook | Returns |
 |---|---|

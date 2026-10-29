@@ -395,38 +395,50 @@ class ChannelStore(models.Model):
     # -- connector hooks ---------------------------------------------------------
 
     def _not_implemented(self, what):
-        raise ChannelError(_("The %(type)s connector does not support: %(what)s", type=self.channel_type, what=what))
+        raise ChannelError(
+            _("The %(type)s connector does not support: %(what)s", type=self.channel_type, what=what)
+        )
+
+    def _dispatch(self, hook, *args, **kwargs):
+        """Call `_<channel_type>_<hook>`: several connectors can be installed side by side."""
+        method = getattr(self, f"_{self.channel_type}_{hook}", None)
+        if method is None:
+            self._not_implemented(hook.replace("_", " "))
+        return method(*args, **kwargs)
 
     def _test_connection(self):
         """Check credentials, refresh locations and return the shop's name."""
-        self._not_implemented("connection test")
+        return self._dispatch("test_connection")
 
     def _register_webhooks(self):
-        self._not_implemented("webhooks")
+        return self._dispatch("register_webhooks")
 
     def _fetch_orders(self, since):
-        """Yield normalised order dicts changed since `since` (see README)."""
-        self._not_implemented("order import")
+        """Yield normalised order dicts changed since `since` (see the README)."""
+        return self._dispatch("fetch_orders", since)
 
     def _fetch_order(self, external_id):
-        self._not_implemented("single order fetch")
+        return self._dispatch("fetch_order", external_id)
 
     def _fetch_products(self):
         """Yield normalised product dicts."""
-        self._not_implemented("product import")
+        return self._dispatch("fetch_products")
 
     def _push_stock_levels(self, items):
-        self._not_implemented("stock push")
+        return self._dispatch("push_stock_levels", items)
 
     def _push_fulfillment(self, picking):
-        self._not_implemented("shipment push")
+        return self._dispatch("push_fulfillment", picking)
 
     def _verify_webhook(self, body, headers):
-        return False
+        return self._dispatch("verify_webhook", body, headers) if self._has_hook("verify_webhook") else False
 
     def _parse_webhook(self, body, headers):
         """Return a list of (job_type, name, payload, dedupe_key) to queue."""
-        return []
+        return self._dispatch("parse_webhook", body, headers) if self._has_hook("parse_webhook") else []
+
+    def _has_hook(self, hook):
+        return hasattr(self, f"_{self.channel_type}_{hook}")
 
     @api.model
     def _credentials_help(self, channel_type):
