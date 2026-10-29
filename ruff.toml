@@ -1,0 +1,13 @@
+target-version = "py310"
+line-length = 120
+
+[lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["E501", "E741", "B904"]
+
+[lint.isort]
+known-first-party = ["odoo"]
+
+[lint.per-file-ignores]
+"__init__.py" = ["F401"]
+"__manifest__.py" = ["B018"]

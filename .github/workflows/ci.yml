@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/ruff-action@v3
+        with:
+          args: check .
+
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: odoo
+          POSTGRES_PASSWORD: odoo
+          POSTGRES_DB: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U odoo" --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Odoo 19.0
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libldap2-dev libsasl2-dev libpq-dev
+          git clone --depth 1 --branch 19.0 --single-branch https://github.com/odoo/odoo.git ../odoo
+          pip install -r ../odoo/requirements.txt
+      - name: Run the module tests
+        run: |
+          MODULES=$(ls -d channel_*/ | tr -d / | paste -sd,)
+          python ../odoo/odoo-bin --addons-path=../odoo/addons,../odoo/odoo/addons,. \
+            --db_host=localhost --db_user=odoo --db_password=odoo -d ci \
+            -i "$MODULES" --test-enable --test-tags "/channel_connector_base,$(echo $MODULES | sed 's#\(channel_[a-z]*\)#/\1#g')" \
+            --stop-after-init --log-level=test
