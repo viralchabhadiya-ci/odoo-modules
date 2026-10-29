@@ -8,7 +8,13 @@ Connectors that link Odoo 19 (Community and Enterprise) with e-commerce platform
 | [`channel_shopify`](channel_shopify/readme/DESCRIPTION.md) | Shopify (Admin GraphQL API) | ready |
 | [`channel_woocommerce`](channel_woocommerce/readme/DESCRIPTION.md) | WooCommerce (REST API v3) | ready |
 
-Planned: Amazon, Claude, QuickBooks, PrestaShop, eBay, Power BI, Magento 2, Brevo, Mailchimp.
+AI:
+
+| Module | What it does | Status |
+|---|---|---|
+| [`claude_mcp_server`](claude_mcp_server/readme/DESCRIPTION.md) | Claude reads and (if allowed) updates Odoo through an MCP server: per-key models, record filters, audit log, daily limit | ready, not yet run with Claude itself |
+
+Planned: Amazon, QuickBooks, PrestaShop, eBay, Power BI, Magento 2, Brevo, Mailchimp.
 
 ## Design
 
