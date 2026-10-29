@@ -46,3 +46,23 @@ The same base will be reused for Amazon, PrestaShop, eBay, Magento 2, etc.
 
 Sources: webkul.com/blog/best-odoo-shopify-connector, webkul.com/blog/best-odoo-woocommerce-connectors,
 apps.odoo.com woo_commerce_ept listing, appnavigator.io Webkul Shopify connector reviews.
+
+## Mailchimp and Brevo (added 2026-10-29)
+
+Competitors (Odoo 19 listings): Mailchimp: TeqStars $393 (two-way contacts, live webhooks, e-commerce export, campaign stats,
+field mapping; needs the Sales and Invoicing apps, proprietary licence, no trial), Cybrosys (imports lists, members,
+templates and campaigns; needs the `mailchimp-marketing` Python package and a server restart; daily sync). Brevo: BrowseInfo
+$55 (imports and exports contacts, lists, campaigns; not for Odoo Online; a reviewer could not swap a wrongly bought version).
+Typical gaps: unsubscribe handling is not described as a rule, no view of contacts the provider refused, a package or
+restart to install, daily rather than frequent sync.
+
+What we build against: Mailchimp `lists/{id}/members` (`since_last_changed`), batch `POST lists/{id}` with `update_existing`,
+`reports`, list webhooks; Brevo `contacts/lists/{id}/contacts` (`modifiedSince`), `contacts/import`, list `remove`,
+`emailCampaigns`, marketing webhooks.
+Where we beat the field:
+1. Unsubscribes win in both directions and nobody is ever subscribed again behind their back.
+2. Only changes travel (fingerprint per contact), every 15 minutes, or within seconds with a webhook.
+3. Refused addresses are listed with the provider's reason, and retried when edited.
+4. No extra Python package, no restart, no dependency on Sales or Invoicing.
+5. One shared engine: the next provider is a small adapter.
+Not yet: e-commerce export to Mailchimp, templates, segments and tags, custom field mapping.
