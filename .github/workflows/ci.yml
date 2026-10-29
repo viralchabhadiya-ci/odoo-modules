@@ -39,7 +39,7 @@ jobs:
           pip install -r ../odoo/requirements.txt
       - name: Run the module tests
         run: |
-          MODULES=$(ls -d channel_*/ marketing_*/ | tr -d / | paste -sd,)
+          MODULES=$(for d in */; do [ -f "$d/__manifest__.py" ] && echo "${d%/}"; done | paste -sd,)
           TAGS=$(echo "$MODULES" | sed -E 's#(^|,)#\1/#g')
           python ../odoo/odoo-bin --addons-path=../odoo/addons,../odoo/odoo/addons,. \
             --db_host=localhost --db_user=odoo --db_password=odoo -d ci \
