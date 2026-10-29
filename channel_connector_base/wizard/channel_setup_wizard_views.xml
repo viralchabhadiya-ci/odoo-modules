@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="channel_setup_wizard_view_form" model="ir.ui.view">
+        <field name="name">channel.setup.wizard.form</field>
+        <field name="model">channel.setup.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <field name="step" invisible="1"/>
+                <field name="store_id" invisible="1"/>
+                <div invisible="step != 'connect'">
+                    <h3>Step 1 of 2: connect your shop</h3>
+                    <group>
+                        <field name="channel_type" widget="radio" options="{'horizontal': true}"/>
+                        <field name="name" placeholder="e.g. Main store"/>
+                        <field name="company_id" groups="base.group_multi_company"/>
+                    </group>
+                    <group name="credentials"/>
+                    <field name="credentials_help" class="text-muted"/>
+                </div>
+                <div invisible="step != 'settings'">
+                    <h3>Step 2 of 2: how should orders and stock behave?</h3>
+                    <p class="text-success"><i class="fa fa-check"/> Connected. You can change everything below later in the store settings.</p>
+                    <group>
+                        <field name="warehouse_id"/>
+                        <field name="auto_workflow"/>
+                        <field name="payment_journal_id" invisible="not auto_workflow"/>
+                        <field name="import_products"/>
+                        <field name="import_old_orders"/>
+                    </group>
+                </div>
+                <footer>
+                    <button name="action_connect" type="object" string="Test connection and continue" class="btn-primary" invisible="step != 'connect'" data-hotkey="q"/>
+                    <button name="action_finish" type="object" string="Finish setup" class="btn-primary" invisible="step != 'settings'" data-hotkey="q"/>
+                    <button string="Cancel" special="cancel" data-hotkey="x"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="channel_setup_wizard_action" model="ir.actions.act_window">
+        <field name="name">Add a store</field>
+        <field name="res_model">channel.setup.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

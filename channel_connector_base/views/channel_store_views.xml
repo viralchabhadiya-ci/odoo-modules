@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="channel_store_view_kanban" model="ir.ui.view">
+        <field name="name">channel.store.kanban</field>
+        <field name="model">channel.store</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile" on_create="channel_connector_base.channel_setup_wizard_action" highlight_color="color">
+                <field name="state"/>
+                <field name="channel_type"/>
+                <field name="currency_id"/>
+                <field name="job_failed_count"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="o_channel_card">
+                            <div class="o_channel_head d-flex justify-content-between align-items-start">
+                                <div class="min-w-0">
+                                    <field name="name" class="fw-bold fs-4 d-block"/>
+                                    <field name="shop_url" class="text-muted"/>
+                                </div>
+                                <span t-attf-class="o_channel_badge o_channel_badge_#{record.channel_type.raw_value}"><field name="channel_type"/></span>
+                            </div>
+                            <div class="mt-2">
+                                <span t-if="record.state.raw_value == 'connected'" class="badge text-bg-success">Connected</span>
+                                <span t-elif="record.state.raw_value == 'error'" class="badge text-bg-danger">Connection problem</span>
+                                <span t-else="" class="badge text-bg-secondary">Not connected</span>
+                                <span class="text-muted ms-2" t-if="record.last_order_sync.raw_value">Last sync <field name="last_order_sync" widget="datetime"/></span>
+                            </div>
+                            <div class="o_channel_tiles">
+                                <div class="o_channel_tile"><b><field name="orders_today"/></b><span>orders today</span></div>
+                                <div class="o_channel_tile"><b><field name="revenue_today" widget="monetary"/></b><span>revenue today</span></div>
+                                <div class="o_channel_tile"><b><field name="product_count"/></b><span>products linked</span></div>
+                                <div class="o_channel_tile"><b><field name="job_pending_count"/></b><span>waiting to sync</span></div>
+                            </div>
+                            <a t-if="record.job_failed_count.raw_value" name="action_view_failed_jobs" type="object" class="o_channel_alert o_channel_alert_bad">
+                                <span><field name="job_failed_count"/> need attention</span><span>Review <i class="fa fa-arrow-right"/></span>
+                            </a>
+                            <div t-else="" class="o_channel_alert o_channel_alert_ok"><span><i class="fa fa-check me-1"/> All good, nothing needs attention</span></div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="channel_store_view_list" model="ir.ui.view">
+        <field name="name">channel.store.list</field>
+        <field name="model">channel.store</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="channel_type"/>
+                <field name="shop_url"/>
+                <field name="state" widget="badge" decoration-success="state == 'connected'" decoration-danger="state == 'error'"/>
+                <field name="last_order_sync"/>
+                <field name="job_failed_count"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="channel_store_view_form" model="ir.ui.view">
+        <field name="name">channel.store.form</field>
+        <field name="model">channel.store</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_test_connection" type="object" string="Test connection" class="btn-primary" invisible="state == 'connected'"/>
+                    <button name="action_test_connection" type="object" string="Test connection" invisible="state != 'connected'"/>
+                    <button name="action_import_orders" type="object" string="Import orders now" invisible="state != 'connected'"/>
+                    <button name="action_import_products" type="object" string="Import products" invisible="state != 'connected'"/>
+                    <button name="action_push_stock" type="object" string="Send stock now" invisible="state != 'connected'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_orders" type="object" class="oe_stat_button" icon="fa-shopping-cart">
+                            <field name="order_count" widget="statinfo" string="Orders"/>
+                        </button>
+                        <button name="action_view_mappings" type="object" class="oe_stat_button" icon="fa-cubes">
+                            <field name="product_count" widget="statinfo" string="Products"/>
+                        </button>
+                        <button name="action_view_pending_jobs" type="object" class="oe_stat_button" icon="fa-clock-o">
+                            <field name="job_pending_count" widget="statinfo" string="Waiting"/>
+                        </button>
+                    </div>
+                    <div class="alert alert-danger d-flex justify-content-between align-items-center" role="alert" invisible="state != 'error'">
+                        <field name="connection_message" readonly="1"/>
+                    </div>
+                    <div class="alert alert-warning d-flex justify-content-between align-items-center" role="alert" invisible="job_failed_count == 0">
+                        <span><field name="job_failed_count" readonly="1"/> sync job(s) need your attention.</span>
+                        <button name="action_view_failed_jobs" type="object" string="Review" class="btn btn-sm btn-warning"/>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. Main Shopify store"/></h1>
+                        <field name="channel_type" widget="badge"/>
+                    </div>
+                    <notebook>
+                        <page string="Connection" name="connection">
+                            <group>
+                                <group>
+                                    <field name="shop_url"/>
+                                    <field name="company_id" groups="base.group_multi_company"/>
+                                </group>
+                                <group name="credentials" groups="channel_connector_base.group_channel_manager">
+                                    <field name="api_key" password="True"/>
+                                    <field name="api_secret" password="True"/>
+                                    <field name="access_token" password="True"/>
+                                    <field name="webhook_secret" password="True"/>
+                                </group>
+                            </group>
+                            <group string="Real-time orders (webhooks)">
+                                <field name="webhooks_registered" widget="boolean_toggle" readonly="1"/>
+                                <field name="webhook_url" widget="CopyClipboardChar"/>
+                                <div colspan="2" class="text-muted">
+                                    <button name="action_register_webhooks" type="object" string="Register webhooks" class="btn btn-link p-0" invisible="state != 'connected'"/>
+                                    Webhooks make new orders appear in seconds. Without them, orders arrive every 15 minutes.
+                                </div>
+                            </group>
+                        </page>
+                        <page string="Orders" name="orders">
+                            <group>
+                                <group string="Import">
+                                    <field name="auto_import_orders" widget="boolean_toggle"/>
+                                    <field name="import_orders_from"/>
+                                    <field name="last_order_sync"/>
+                                    <field name="create_missing_products" widget="boolean_toggle"/>
+                                </group>
+                                <group string="Created in Odoo with">
+                                    <field name="warehouse_id"/>
+                                    <field name="pricelist_id"/>
+                                    <field name="team_id"/>
+                                    <field name="shipping_product_id"/>
+                                    <field name="adjustment_product_id"/>
+                                    <field name="refund_post" widget="boolean_toggle"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Order automation" name="automation">
+                            <p class="text-muted">The first workflow whose payment methods match an imported order is applied. Leave payment methods empty to match everything.</p>
+                            <field name="workflow_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="gateway_names" placeholder="All payment methods"/>
+                                    <field name="only_if_paid" widget="boolean_toggle"/>
+                                    <field name="confirm_order" widget="boolean_toggle"/>
+                                    <field name="create_invoice" widget="boolean_toggle"/>
+                                    <field name="post_invoice" widget="boolean_toggle" optional="hide"/>
+                                    <field name="register_payment" widget="boolean_toggle"/>
+                                    <field name="payment_journal_id" optional="show"/>
+                                    <field name="validate_delivery" widget="boolean_toggle"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Stock" name="stock">
+                            <group>
+                                <group string="Send stock to the channel">
+                                    <field name="auto_push_stock" widget="boolean_toggle"/>
+                                    <field name="stock_quantity_type"/>
+                                    <field name="stock_safety"/>
+                                    <field name="last_stock_sync"/>
+                                </group>
+                                <group string="Shipments">
+                                    <field name="auto_push_fulfillment" widget="boolean_toggle"/>
+                                </group>
+                            </group>
+                            <p class="text-muted">Match each channel location with the warehouse whose stock it should show. Locations without a warehouse are left alone.</p>
+                            <field name="location_ids">
+                                <list editable="bottom" create="false" delete="false">
+                                    <field name="name"/>
+                                    <field name="external_id" readonly="1"/>
+                                    <field name="warehouse_id"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="channel_store_action" model="ir.actions.act_window">
+        <field name="name">Stores</field>
+        <field name="res_model">channel.store</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Connect your first store</p>
+            <p>Click <b>New</b> to link a shop in about two minutes.</p>
+        </field>
+    </record>
+</odoo>

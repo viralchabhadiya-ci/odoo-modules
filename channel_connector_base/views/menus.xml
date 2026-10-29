@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_channel_root" name="Sales Channels" sequence="45"
+              web_icon="channel_connector_base,static/description/icon.svg"
+              groups="group_channel_user"/>
+    <menuitem id="menu_channel_stores" name="Stores" parent="menu_channel_root" action="channel_store_action" sequence="10"/>
+    <menuitem id="menu_channel_jobs" name="Sync log" parent="menu_channel_root" action="channel_job_action" sequence="20"/>
+    <menuitem id="menu_channel_config" name="Configuration" parent="menu_channel_root" sequence="90" groups="group_channel_manager"/>
+    <menuitem id="menu_channel_workflows" name="Order workflows" parent="menu_channel_config" action="channel_workflow_action" sequence="10"/>
+    <menuitem id="menu_channel_mappings" name="Linked products" parent="menu_channel_config" action="channel_mapping_action" sequence="20"/>
+</odoo>

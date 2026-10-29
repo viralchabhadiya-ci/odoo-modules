@@ -1,0 +1,25 @@
+// Store dashboard cards. Colours come from Odoo's own CSS variables so dark mode keeps working.
+.o_kanban_view .o_channel_card {
+    .o_channel_head { gap: .75rem; }
+    .o_channel_badge {
+        font-size: .75rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+        padding: .15rem .6rem; border-radius: 1rem;
+        background: var(--o-brand-primary-subtle, rgba(113, 75, 103, .12)); color: var(--o-brand-primary, #714b67);
+    }
+    .o_channel_badge_shopify { background: #e6f4ea; color: #1b6b35; }
+    .o_channel_badge_woocommerce { background: #efe7f7; color: #6b3fa0; }
+    .o_channel_tiles {
+        display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; margin: .75rem 0;
+        .o_channel_tile {
+            background: var(--bs-tertiary-bg, #f4f5f6); border-radius: .5rem; padding: .5rem .75rem;
+            b { display: block; font-size: 1.25rem; line-height: 1.3; font-variant-numeric: tabular-nums; }
+            span { font-size: .8rem; color: var(--bs-secondary-color, #6c757d); }
+        }
+    }
+    .o_channel_alert {
+        display: flex; justify-content: space-between; align-items: center; min-height: 2.5rem;
+        padding: .4rem .75rem; border-radius: .5rem; font-weight: 500; font-size: .9rem;
+        &.o_channel_alert_bad { background: var(--bs-danger-bg-subtle, #fbe4e2); color: var(--bs-danger-text-emphasis, #842029); cursor: pointer; }
+        &.o_channel_alert_ok { background: var(--bs-success-bg-subtle, #e1f3e9); color: var(--bs-success-text-emphasis, #0f5132); }
+    }
+}

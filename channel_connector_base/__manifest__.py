@@ -1,0 +1,28 @@
+{
+    "name": "Sales Channel Connector Base",
+    "version": "19.0.1.0.0",
+    "category": "Sales/Sales",
+    "summary": "Shared engine for e-commerce and marketplace connectors: "
+    "job queue, mappings, order workflows, webhooks and a guided setup",
+    "author": "Veer",
+    "website": "https://github.com/viralchabhadiya-ci/odoo-modules",
+    "license": "LGPL-3",
+    "depends": ["sale_management", "sale_stock", "stock_delivery", "account", "mail"],
+    "data": [
+        "security/channel_security.xml",
+        "security/ir.model.access.csv",
+        "data/channel_data.xml",
+        "data/ir_cron.xml",
+        "views/channel_store_views.xml",
+        "views/channel_job_views.xml",
+        "views/channel_workflow_views.xml",
+        "views/channel_misc_views.xml",
+        "views/sale_order_views.xml",
+        "wizard/channel_setup_wizard_views.xml",
+        "views/menus.xml",
+    ],
+    "assets": {"web.assets_backend": ["channel_connector_base/static/src/scss/channel.scss"]},
+    "application": True,
+    "installable": True,
+    "web_icon": "channel_connector_base,static/description/icon.svg",
+}

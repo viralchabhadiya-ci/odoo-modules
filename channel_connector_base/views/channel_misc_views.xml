@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="channel_mapping_view_list" model="ir.ui.view">
+        <field name="name">channel.mapping.list</field>
+        <field name="model">channel.mapping</field>
+        <field name="arch" type="xml">
+            <list editable="bottom" create="false" delete="false">
+                <field name="store_id" readonly="1"/>
+                <field name="record_name"/>
+                <field name="external_id" readonly="1"/>
+                <field name="external_ref" readonly="1"/>
+                <field name="push_stock"/>
+            </list>
+        </field>
+    </record>
+    <record id="channel_mapping_action" model="ir.actions.act_window">
+        <field name="name">Linked products</field>
+        <field name="res_model">channel.mapping</field>
+        <field name="view_mode">list</field>
+        <field name="domain">[('res_model', '=', 'product.product')]</field>
+    </record>
+</odoo>

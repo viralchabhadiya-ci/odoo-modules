@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="channel_job_view_list" model="ir.ui.view">
+        <field name="name">channel.job.list</field>
+        <field name="model">channel.job</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="state == 'failed'" decoration-muted="state == 'done'" create="false">
+                <field name="create_date"/>
+                <field name="store_id"/>
+                <field name="job_type" optional="hide"/>
+                <field name="name"/>
+                <field name="external_ref" optional="hide"/>
+                <field name="state" widget="badge" decoration-success="state == 'done'" decoration-danger="state == 'failed'" decoration-warning="state == 'pending'"/>
+                <field name="error" optional="show"/>
+                <field name="retry_count" optional="hide"/>
+                <button name="action_retry" type="object" string="Retry" icon="fa-refresh" invisible="state == 'done'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="channel_job_view_form" model="ir.ui.view">
+        <field name="name">channel.job.form</field>
+        <field name="model">channel.job</field>
+        <field name="arch" type="xml">
+            <form create="false">
+                <header>
+                    <button name="action_retry" type="object" string="Retry now" class="btn-primary" invisible="state == 'done'"/>
+                    <button name="action_mark_done" type="object" string="Mark as done" invisible="state == 'done'" groups="channel_connector_base.group_channel_manager"/>
+                    <button name="action_open_result" type="object" string="Open result" invisible="not res_id"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="store_id"/>
+                            <field name="job_type"/>
+                            <field name="external_ref"/>
+                        </group>
+                        <group>
+                            <field name="retry_count"/>
+                            <field name="max_retries"/>
+                            <field name="next_try"/>
+                            <field name="date_done"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-danger" role="alert" invisible="not error"><field name="error" readonly="1"/></div>
+                    <notebook>
+                        <page string="Technical" groups="channel_connector_base.group_channel_manager">
+                            <field name="traceback" readonly="1"/>
+                            <field name="payload" readonly="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="channel_job_view_search" model="ir.ui.view">
+        <field name="name">channel.job.search</field>
+        <field name="model">channel.job</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="external_ref"/>
+                <field name="store_id"/>
+                <filter name="failed" string="Needs attention" domain="[('state', '=', 'failed')]"/>
+                <filter name="pending" string="Waiting" domain="[('state', '=', 'pending')]"/>
+                <filter name="done" string="Done" domain="[('state', '=', 'done')]"/>
+                <group>
+                    <filter name="group_store" string="Store" context="{'group_by': 'store_id'}"/>
+                    <filter name="group_type" string="Type" context="{'group_by': 'job_type'}"/>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="channel_job_action" model="ir.actions.act_window">
+        <field name="name">Sync log</field>
+        <field name="res_model">channel.job</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_failed': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Nothing needs your attention</p>
+            <p>Every order, stock update and shipment shows up here with a plain-language error if it fails.</p>
+        </field>
+    </record>
+</odoo>

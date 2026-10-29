@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="channel_workflow_view_list" model="ir.ui.view">
+        <field name="name">channel.workflow.list</field>
+        <field name="model">channel.workflow</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="store_id"/>
+                <field name="gateway_names"/>
+                <field name="confirm_order"/>
+                <field name="create_invoice"/>
+                <field name="register_payment"/>
+                <field name="validate_delivery"/>
+            </list>
+        </field>
+    </record>
+    <record id="channel_workflow_action" model="ir.actions.act_window">
+        <field name="name">Order workflows</field>
+        <field name="res_model">channel.workflow</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>
