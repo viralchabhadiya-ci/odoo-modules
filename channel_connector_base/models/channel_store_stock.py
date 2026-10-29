@@ -18,6 +18,27 @@ class ChannelStore(models.Model):
             for row in quantities
         }
 
+    def _sync_locations(self, locations):
+        """Create the channel locations we do not know yet: [{"external_id", "name"}].
+
+        One location gets the store warehouse; mapping several to it would count the stock twice."""
+        self.ensure_one()
+        existing = {location.external_id: location for location in self.location_ids}
+        first_free = not self.location_ids.filtered("warehouse_id")
+        for data in locations:
+            if data["external_id"] in existing:
+                existing[data["external_id"]].name = data["name"]
+                continue
+            self.env["channel.location"].create(
+                {
+                    "store_id": self.id,
+                    "name": data["name"],
+                    "external_id": data["external_id"],
+                    "warehouse_id": self.warehouse_id.id if first_free else False,
+                }
+            )
+            first_free = False
+
     def _push_stock(self):
         """Queue stock updates for the variants whose quantity changed. Returns how many."""
         self.ensure_one()
