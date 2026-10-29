@@ -8,7 +8,13 @@ Connectors that link Odoo 19 (Community and Enterprise) with e-commerce platform
 | [`channel_shopify`](channel_shopify/readme/DESCRIPTION.md) | Shopify (Admin GraphQL API) | ready |
 | [`channel_woocommerce`](channel_woocommerce/readme/DESCRIPTION.md) | WooCommerce (REST API v3) | ready |
 
-Planned: Amazon, Claude, QuickBooks, PrestaShop, eBay, Power BI, Magento 2, Brevo, Mailchimp.
+Reporting:
+
+| Module | What it does | Status |
+|---|---|---|
+| [`powerbi_connector`](powerbi_connector/readme/DESCRIPTION.md) | Power BI reads Odoo through an OData feed with an access key; optional push dataset | ready, not yet run against Power BI itself |
+
+Planned: Amazon, Claude, QuickBooks, PrestaShop, eBay, Magento 2, Brevo, Mailchimp.
 
 ## Design
 
