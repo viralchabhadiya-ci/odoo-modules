@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_groups_privilege_channel" model="res.groups.privilege">
+        <field name="name">Sales Channels</field>
+        <field name="sequence">40</field>
+        <field name="category_id" ref="base.module_category_sales"/>
+    </record>
+
+    <record id="group_channel_user" model="res.groups">
+        <field name="name">User</field>
+        <field name="sequence">10</field>
+        <field name="privilege_id" ref="res_groups_privilege_channel"/>
+        <field name="implied_ids" eval="[(4, ref('sales_team.group_sale_salesman'))]"/>
+        <field name="comment">Can see stores, jobs and logs, and retry failed jobs.</field>
+    </record>
+
+    <record id="group_channel_manager" model="res.groups">
+        <field name="name">Administrator</field>
+        <field name="sequence">20</field>
+        <field name="privilege_id" ref="res_groups_privilege_channel"/>
+        <field name="implied_ids" eval="[(4, ref('group_channel_user'))]"/>
+        <field name="user_ids" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+        <field name="comment">Can connect stores, see credentials and change settings.</field>
+    </record>
+
+    <data noupdate="1">
+        <record id="channel_store_company_rule" model="ir.rule">
+            <field name="name">Sales channel store: multi-company</field>
+            <field name="model_id" ref="model_channel_store"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="channel_job_company_rule" model="ir.rule">
+            <field name="name">Sales channel job: multi-company</field>
+            <field name="model_id" ref="model_channel_job"/>
+            <field name="domain_force">[('store_id.company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="channel_mapping_company_rule" model="ir.rule">
+            <field name="name">Sales channel mapping: multi-company</field>
+            <field name="model_id" ref="model_channel_mapping"/>
+            <field name="domain_force">[('store_id.company_id', 'in', company_ids)]</field>
+        </record>
+    </data>
+</odoo>

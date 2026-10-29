@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="ir_cron_import_orders" model="ir.cron">
+        <field name="name">Sales channels: import orders</field>
+        <field name="model_id" ref="model_channel_store"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_import_orders()</field>
+        <field name="interval_number">15</field>
+        <field name="interval_type">minutes</field>
+        <field name="user_id" ref="base.user_root"/>
+    </record>
+    <record id="ir_cron_push_stock" model="ir.cron">
+        <field name="name">Sales channels: update stock</field>
+        <field name="model_id" ref="model_channel_store"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_push_stock()</field>
+        <field name="interval_number">15</field>
+        <field name="interval_type">minutes</field>
+        <field name="user_id" ref="base.user_root"/>
+    </record>
+    <record id="ir_cron_run_jobs" model="ir.cron">
+        <field name="name">Sales channels: run waiting jobs</field>
+        <field name="model_id" ref="model_channel_store"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_run_jobs()</field>
+        <field name="interval_number">2</field>
+        <field name="interval_type">minutes</field>
+        <field name="user_id" ref="base.user_root"/>
+    </record>
+</odoo>

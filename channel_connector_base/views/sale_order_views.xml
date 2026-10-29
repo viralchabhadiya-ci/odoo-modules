@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="sale_order_view_form_channel" model="ir.ui.view">
+        <field name="name">sale.order.form.channel</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='client_order_ref']" position="after">
+                <field name="channel_store_id" invisible="not channel_store_id"/>
+                <field name="channel_order_name" invisible="not channel_store_id"/>
+            </xpath>
+        </field>
+    </record>
+    <record id="sale_order_view_search_channel" model="ir.ui.view">
+        <field name="name">sale.order.search.channel</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.sale_order_view_search_inherit_sale"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <field name="channel_order_name"/>
+                <filter name="from_channel" string="From a sales channel" domain="[('channel_store_id', '!=', False)]"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

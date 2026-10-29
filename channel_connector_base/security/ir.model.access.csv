@@ -1,0 +1,12 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_channel_store_user,channel.store user,model_channel_store,group_channel_user,1,0,0,0
+access_channel_store_manager,channel.store manager,model_channel_store,group_channel_manager,1,1,1,1
+access_channel_job_user,channel.job user,model_channel_job,group_channel_user,1,1,0,0
+access_channel_job_manager,channel.job manager,model_channel_job,group_channel_manager,1,1,1,1
+access_channel_mapping_user,channel.mapping user,model_channel_mapping,group_channel_user,1,0,0,0
+access_channel_mapping_manager,channel.mapping manager,model_channel_mapping,group_channel_manager,1,1,1,1
+access_channel_location_user,channel.location user,model_channel_location,group_channel_user,1,0,0,0
+access_channel_location_manager,channel.location manager,model_channel_location,group_channel_manager,1,1,1,1
+access_channel_workflow_user,channel.workflow user,model_channel_workflow,group_channel_user,1,0,0,0
+access_channel_workflow_manager,channel.workflow manager,model_channel_workflow,group_channel_manager,1,1,1,1
+access_channel_setup_wizard_manager,channel.setup.wizard manager,model_channel_setup_wizard,group_channel_manager,1,1,1,1

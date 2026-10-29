@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="product_channel_shipping" model="product.product">
+        <field name="name">Shipping (sales channel)</field>
+        <field name="type">service</field>
+        <field name="list_price">0</field>
+        <field name="sale_ok" eval="True"/>
+        <field name="purchase_ok" eval="False"/>
+        <field name="default_code">CHANNEL-SHIP</field>
+    </record>
+    <record id="product_channel_adjustment" model="product.product">
+        <field name="name">Adjustment (sales channel)</field>
+        <field name="type">service</field>
+        <field name="list_price">0</field>
+        <field name="sale_ok" eval="True"/>
+        <field name="purchase_ok" eval="False"/>
+        <field name="default_code">CHANNEL-ADJ</field>
+    </record>
+</odoo>
