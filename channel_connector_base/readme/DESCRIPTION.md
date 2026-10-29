@@ -39,6 +39,6 @@ credentials are rejected. Everything else is logged with its traceback on the jo
 Normalised order: `external_id, name, date, updated_at, cancelled, currency, email, phone, note, customer_id,
 billing, shipping, taxes_included, gateways, paid, fulfilled, channel_fulfilled (the channel ships it itself: taken
 from the store's *fulfilled warehouse* and booked as delivered), lines[{external_id, name, sku, barcode, variant_id,
-inventory_ref, qty, price, discounted_price, taxes[{rate}], push_stock}], shipping_lines[{title, price, taxes}],
+inventory_ref, qty, price, discounted_price, taxes[{rate}], push_stock}], shipping_lines[{title, price, taxes}], discount_lines[{title, price, taxes}] (order level, booked on the adjustment product),
 refunds[{external_id, amount, lines[{line_id, sku, qty}]}]`. A product variant may also carry `push_stock: False`
 (listings the channel stores and ships itself must never receive Odoo's stock). See `channel_shopify/models/channel_store.py`.

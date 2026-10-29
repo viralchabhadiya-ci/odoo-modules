@@ -75,3 +75,18 @@ How we beat the field:
 
 Not in this version: refunds/returns (Finances API), FBA inventory pulled into Odoo, settlement reconciliation, creating
 listings from Odoo, B2B/VAT invoicing data, SQS notifications.
+
+## PrestaShop (added 2026-10-29)
+
+Competitors (Odoo 19 listings): Webkul $199 (two modules; credit slips only on 19/20), VentorTech PRO $568
+(refunds "coming soon", webhooks need an extra PrestaShop module, mrp dependency), Globalteckz $248, Jupical $233,
+TeqStars $250. Only Webkul syncs credit slips; none of the others do, and all of them sync on a schedule.
+
+What we build against: the PrestaShop Webservice (basic auth with the key as user, `output_format=JSON`, `filter`,
+`display=full`, `limit=offset,count`; writes are XML only). We beat the field on:
+1. Credit slips become credit notes, by returned quantity, and a slip on an otherwise unchanged order is still picked up.
+2. Shop time zone read from the shop (PrestaShop dates carry no offset) so order sync windows are right.
+3. Bulk lookups per batch of orders (customers, addresses) instead of three calls per order.
+4. Stock refused by name (advanced stock management, deleted product) without blocking the rest.
+5. Tracking number plus order status in one step, and no second status change when the order is already shipped.
+6. Key permissions are explained resource by resource in the error message.

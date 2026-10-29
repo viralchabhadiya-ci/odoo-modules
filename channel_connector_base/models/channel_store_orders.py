@@ -291,6 +291,21 @@ class ChannelStore(models.Model):
                     taxes_included,
                 )
             )
+        for discount in data.get("discount_lines") or []:
+            if not self.adjustment_product_id:
+                raise ChannelError(_("Set an adjustment product in the store settings."))
+            lines.append(
+                self._line_vals(
+                    self.adjustment_product_id,
+                    {
+                        "name": discount.get("title") or _("Discount"),
+                        "qty": 1,
+                        "price": -abs(float(discount.get("price") or 0.0)),
+                        "taxes": discount.get("taxes"),
+                    },
+                    taxes_included,
+                )
+            )
         if not lines:
             raise ChannelError(_("Order %s has no lines.", data.get("name")))
         return lines
@@ -320,6 +335,21 @@ class ChannelStore(models.Model):
             "channel_line_id": line.get("external_id") and str(line["external_id"]),
         }
         return vals
+
+    def _closest_tax_rate(self, rate):
+        """Channels that only give tax amounts: use the Odoo sale tax rate the amounts add up to, if one is close."""
+        self.ensure_one()
+        rates = self.env["account.tax"].search(
+            [
+                ("type_tax_use", "=", "sale"),
+                ("amount_type", "=", "percent"),
+                ("company_id", "=", self.company_id.id),
+            ]
+        ).mapped("amount")
+        closest = min(rates, key=lambda amount: abs(amount - rate), default=None)
+        if closest is not None and abs(closest - rate) <= 0.3:
+            return closest
+        return round(rate, 1)
 
     def _find_taxes(self, tax_lines):
         taxes = self.env["account.tax"]

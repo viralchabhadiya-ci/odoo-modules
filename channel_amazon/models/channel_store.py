@@ -267,22 +267,8 @@ class ChannelStore(models.Model):
     def _amazon_order(self, order):
         data = normalize_order(order)
         for node in [*data["lines"], *data["shipping_lines"]]:
-            node["taxes"] = [{"rate": self._amazon_snap_rate(t["rate"])} for t in node["taxes"]]
+            node["taxes"] = [{"rate": self._closest_tax_rate(t["rate"])} for t in node["taxes"]]
         return data
-
-    def _amazon_snap_rate(self, rate):
-        """Amazon only gives tax amounts. Use the Odoo sale tax the amounts add up to when there is one."""
-        taxes = self.env["account.tax"].search(
-            [
-                ("type_tax_use", "=", "sale"),
-                ("amount_type", "=", "percent"),
-                ("company_id", "=", self.company_id.id),
-            ]
-        )
-        closest = min(taxes.mapped("amount"), key=lambda amount: abs(amount - rate), default=None)
-        if closest is not None and abs(closest - rate) <= 0.3:
-            return closest
-        return round(rate, 1)
 
     def _amazon_order_vals(self, data):
         return {"amazon_marketplace_id": data.get("marketplace_id")}
