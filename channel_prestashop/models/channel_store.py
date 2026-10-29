@@ -108,7 +108,7 @@ def normalize_order(order, lookups, slips=None):
         carrier = lookups["carriers"].get(str(order.get("id_carrier")))
         extras.append(
             {
-                "title": carrier or _("Shipping"),
+                "title": carrier or "Shipping",
                 "price": shipping,
                 "taxes": _taxes(_float(order.get("carrier_tax_rate")) or _rate(shipping, _float(order.get("total_shipping_tax_incl")))),
             }
@@ -117,7 +117,7 @@ def normalize_order(order, lookups, slips=None):
     if wrapping:
         extras.append(
             {
-                "title": _("Gift wrapping"),
+                "title": "Gift wrapping",
                 "price": wrapping,
                 "taxes": _taxes(_rate(wrapping, _float(order.get("total_wrapping_tax_incl")))),
             }
@@ -126,7 +126,7 @@ def normalize_order(order, lookups, slips=None):
     discounts = (
         [
             {
-                "title": _("Discount"),
+                "title": "Discount",
                 "price": discount,
                 "taxes": _taxes(_rate(discount, _float(order.get("total_discounts_tax_incl")))),
             }
