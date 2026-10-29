@@ -8,7 +8,13 @@ Connectors that link Odoo 19 (Community and Enterprise) with e-commerce platform
 | [`channel_shopify`](channel_shopify/readme/DESCRIPTION.md) | Shopify (Admin GraphQL API) | ready |
 | [`channel_woocommerce`](channel_woocommerce/readme/DESCRIPTION.md) | WooCommerce (REST API v3) | ready |
 
-Planned: Amazon, Claude, QuickBooks, PrestaShop, eBay, Power BI, Magento 2, Brevo, Mailchimp.
+Accounting:
+
+| Module | What it does | Status |
+|---|---|---|
+| [`quickbooks_connector`](quickbooks_connector/readme/DESCRIPTION.md) | QuickBooks Online: invoices, bills, credit notes and payments out; customers, vendors and payments in | ready, not yet run against QuickBooks itself |
+
+Planned: Amazon, Claude, PrestaShop, eBay, Power BI, Magento 2, Brevo, Mailchimp.
 
 ## Design
 

@@ -46,3 +46,24 @@ The same base will be reused for Amazon, PrestaShop, eBay, Magento 2, etc.
 
 Sources: webkul.com/blog/best-odoo-shopify-connector, webkul.com/blog/best-odoo-woocommerce-connectors,
 apps.odoo.com woo_commerce_ept listing, appnavigator.io Webkul Shopify connector reviews.
+
+## QuickBooks Online (added 2026-10-29)
+
+Competitors (Odoo 19 listings): Pragmatic "QuickBooks Online Connector" $250 (bi-directional master data and documents, manual
+export per record, scheduled payments only, needs Employees, Inventory, Invoicing, Purchase, Sales, Discuss and Project, chart of
+accounts import fails for accounts without a number, credentials typed on the company record); PIT Solutions $144.80 (two-way
+by activity, US edition only, records with several taxes or discounts across lines are skipped on export, credits cannot be
+linked to their invoice, depends on hr, stock, sale_management, purchase, mail, errors only in an activity log).
+
+What we build against: QuickBooks Online accounting API v3 (OAuth 2.0 authorization code, `query`, create and sparse update with
+`SyncToken`, `operation=void|delete`, Invoice, CreditMemo, Bill, VendorCredit, Payment, BillPayment, Customer, Vendor, Item,
+Account, TaxCode, TaxRate).
+Where we beat the field:
+1. Needs only Invoicing; no other app has to be installed.
+2. One-click Intuit sign-in (no copying codes), tokens saved in their own transaction because Intuit rotates them.
+3. Duplicate-safe contacts (the shared customer/vendor name list is the usual cause of failed exports).
+4. Per-record sync log with the reason, retries, a Retry button, and a warning when QuickBooks computes another total.
+5. Works for non-US companies through tax-code mapping, and for US companies without any mapping; discounts are not a reason to skip a record.
+6. Payments flow both ways and are reconciled in Odoo; documents taken back to draft are voided or deleted in QuickBooks.
+7. History is never sent by accident: a "dated from" limit starts at today.
+Not yet: inventory quantities, journal entries, orders, QuickBooks webhooks, applying credit memos inside QuickBooks.

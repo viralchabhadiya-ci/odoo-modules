@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="quickbooks_account_view_list" model="ir.ui.view">
+        <field name="name">quickbooks.account.list</field>
+        <field name="model">quickbooks.account</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="state == 'error'" decoration-muted="state == 'draft'">
+                <field name="company_id"/>
+                <field name="remote_name"/>
+                <field name="environment"/>
+                <field name="state" widget="badge" decoration-success="state == 'connected'" decoration-danger="state == 'error'"/>
+                <field name="last_sync"/>
+                <field name="error_count"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="quickbooks_account_view_form" model="ir.ui.view">
+        <field name="name">quickbooks.account.form</field>
+        <field name="model">quickbooks.account</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_connect" type="object" string="Connect to QuickBooks" class="btn-primary"
+                            invisible="state == 'connected' or not id"/>
+                    <button name="action_connect" type="object" string="Connect again" invisible="state != 'connected'"/>
+                    <button name="action_sync_now" type="object" string="Sync now" class="btn-primary" invisible="state != 'connected'"/>
+                    <button name="action_refresh_lists" type="object" string="Refresh lists" invisible="state != 'connected'"
+                            help="Reload the QuickBooks accounts and tax codes, and match them with yours."/>
+                    <button name="action_test" type="object" string="Test connection" invisible="state == 'draft'"/>
+                    <button name="action_disconnect" type="object" string="Disconnect" invisible="state == 'draft'"
+                            confirm="Odoo stops talking to QuickBooks. Nothing is deleted on either side. Continue?"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,connected"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_links" type="object" class="oe_stat_button" icon="fa-exchange" invisible="not link_count">
+                            <field name="link_count" widget="statinfo" string="Synced records"/>
+                        </button>
+                        <button name="action_open_errors" type="object" class="oe_stat_button text-danger" icon="fa-exclamation-triangle"
+                                invisible="not error_count">
+                            <field name="error_count" widget="statinfo" string="With errors"/>
+                        </button>
+                    </div>
+                    <div class="alert alert-danger" role="alert" invisible="not connection_message">
+                        <field name="connection_message" nolabel="1"/>
+                    </div>
+                    <div class="alert alert-warning" role="alert" invisible="not sync_errors">
+                        <b>Not sent in the last round:</b>
+                        <field name="sync_errors" nolabel="1"/>
+                        <div class="text-muted">Fix the cause, then press Sync now. Records retry on their own up to three times.</div>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="company_id" options="{'no_create': True}"/></h1>
+                        <h3 invisible="not remote_name"><field name="remote_name" readonly="1"/></h3>
+                    </div>
+                    <div class="alert alert-info" role="status" invisible="state == 'connected'">
+                        <b>Before you connect:</b> create an app at developer.intuit.com, add the Redirect URI below under
+                        Keys &amp; credentials, copy the Client ID and secret here and save. Then press Connect: QuickBooks asks
+                        you to sign in and choose the company.
+                    </div>
+                    <group string="Your Intuit app" invisible="state == 'connected'">
+                        <group>
+                            <field name="environment"/>
+                            <field name="client_id"/>
+                            <field name="client_secret" password="True"/>
+                        </group>
+                        <group>
+                            <field name="redirect_uri" widget="CopyClipboardChar"/>
+                        </group>
+                    </group>
+                    <notebook invisible="not id">
+                        <page string="What is sent" name="sending">
+                            <group>
+                                <group string="From Odoo to QuickBooks">
+                                    <field name="auto_sync"/>
+                                    <field name="sync_from"/>
+                                    <field name="push_invoices"/>
+                                    <field name="push_bills"/>
+                                    <field name="push_payments"/>
+                                </group>
+                                <group string="From QuickBooks to Odoo">
+                                    <field name="pull_contacts"/>
+                                    <field name="pull_payments"/>
+                                    <field name="payment_journal_id" invisible="not pull_payments" options="{'no_create': True}"/>
+                                    <field name="last_pull"/>
+                                    <field name="last_sync"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Accounts and taxes" name="accounts" invisible="state != 'connected'">
+                            <group>
+                                <group>
+                                    <field name="income_ref_id" options="{'no_create': True}"/>
+                                    <field name="expense_ref_id" options="{'no_create': True}"/>
+                                    <field name="bank_ref_id" options="{'no_create': True}"/>
+                                    <field name="zero_tax_ref_id" options="{'no_create': True}"/>
+                                </group>
+                                <group>
+                                    <field name="country_code"/>
+                                    <div class="text-muted">
+                                        Your Odoo accounts and taxes are matched with QuickBooks by number, name or rate when
+                                        you press Refresh lists. Change a match on the account or tax itself.
+                                    </div>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="QuickBooks lists" name="lists" invisible="state != 'connected'">
+                            <field name="ref_ids" readonly="1">
+                                <list>
+                                    <field name="kind"/>
+                                    <field name="number"/>
+                                    <field name="name"/>
+                                    <field name="account_type"/>
+                                    <field name="rate"/>
+                                    <field name="remote_id"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="quickbooks_link_view_list" model="ir.ui.view">
+        <field name="name">quickbooks.link.list</field>
+        <field name="model">quickbooks.link</field>
+        <field name="arch" type="xml">
+            <list create="0" decoration-danger="error" decoration-warning="note and not error">
+                <field name="entity"/>
+                <field name="record_name"/>
+                <field name="remote_id"/>
+                <field name="last_sync"/>
+                <field name="note"/>
+                <field name="error"/>
+                <field name="attempts" optional="hide"/>
+                <button name="action_open_record" type="object" icon="fa-external-link" title="Open the Odoo record"/>
+                <button name="action_retry" type="object" icon="fa-repeat" title="Try again" invisible="not error"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="quickbooks_link_view_form" model="ir.ui.view">
+        <field name="name">quickbooks.link.form</field>
+        <field name="model">quickbooks.link</field>
+        <field name="arch" type="xml">
+            <form create="0" edit="0">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="entity"/>
+                            <field name="record_name"/>
+                            <field name="remote_id"/>
+                            <field name="sync_token"/>
+                        </group>
+                        <group>
+                            <field name="last_sync"/>
+                            <field name="attempts"/>
+                            <field name="note"/>
+                        </group>
+                    </group>
+                    <field name="error"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="quickbooks_link_view_search" model="ir.ui.view">
+        <field name="name">quickbooks.link.search</field>
+        <field name="model">quickbooks.link</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="remote_id"/>
+                <field name="res_model"/>
+                <filter name="failed" string="With errors" domain="[('error', '!=', False)]"/>
+                <filter name="warned" string="With a warning" domain="[('note', '!=', False)]"/>
+                <group>
+                    <filter name="by_entity" string="Kind" context="{'group_by': 'entity'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="quickbooks_account_action" model="ir.actions.act_window">
+        <field name="name">QuickBooks</field>
+        <field name="res_model">quickbooks.account</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Connect Odoo to QuickBooks Online</p>
+            <p>Create a connection for your company, sign in to QuickBooks and Odoo starts sending invoices, bills and payments.</p>
+        </field>
+    </record>
+
+    <record id="quickbooks_link_action" model="ir.actions.act_window">
+        <field name="name">Sync log</field>
+        <field name="res_model">quickbooks.link</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_quickbooks_root" name="QuickBooks" sequence="132" groups="group_quickbooks_manager"/>
+    <menuitem id="menu_quickbooks_account" name="Connections" parent="menu_quickbooks_root"
+              action="quickbooks_account_action" sequence="10"/>
+    <menuitem id="menu_quickbooks_link" name="Sync log" parent="menu_quickbooks_root" action="quickbooks_link_action" sequence="20"/>
+</odoo>
