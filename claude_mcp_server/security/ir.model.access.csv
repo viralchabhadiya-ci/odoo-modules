@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_claude_mcp_token_manager,claude.mcp.token manager,model_claude_mcp_token,group_mcp_manager,1,1,1,1
+access_claude_mcp_access_manager,claude.mcp.access manager,model_claude_mcp_access,group_mcp_manager,1,1,1,1
+access_claude_mcp_log_manager,claude.mcp.log manager,model_claude_mcp_log,group_mcp_manager,1,0,0,1
+access_claude_mcp_token_wizard_manager,claude.mcp.token.wizard manager,model_claude_mcp_token_wizard,group_mcp_manager,1,1,1,1

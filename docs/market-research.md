@@ -1,4 +1,4 @@
-# Shopify + WooCommerce Odoo connectors: market research and plan
+# Shopify, WooCommerce and Amazon Odoo connectors: market research and plan
 
 Date: 2026-10-29. Target: Odoo 19.0 (Community + Enterprise).
 
@@ -46,6 +46,139 @@ The same base will be reused for Amazon, PrestaShop, eBay, Magento 2, etc.
 
 Sources: webkul.com/blog/best-odoo-shopify-connector, webkul.com/blog/best-odoo-woocommerce-connectors,
 apps.odoo.com woo_commerce_ept listing, appnavigator.io Webkul Shopify connector reviews.
+
+## Amazon (added 2026-10-29)
+
+Competitor: Emipro `amazon_ept` v19, about $614 plus IAP packs (free for 3 months, then 99 EUR a month or 999 EUR a year).
+It covers FBM, FBA and mixed accounts, many marketplaces, product import, FBM stock export, FBA live inventory,
+returns and refunds, inbound shipments, removal orders and settlement reports. Common complaints: billing that is hard
+to predict (IAP fees), slow support, long configuration.
+
+What we build against, from the Selling Partner API documentation:
+- **Auth**: Login with Amazon refresh token (client id + secret + refresh token). Self-authorised private apps need no AWS
+  account, IAM user or request signing any more, so setup is three pasted values and a Seller ID.
+- **Orders**: Orders API v2026-01-01 (`searchOrders`, `getOrder`). v0 is being replaced; the new API says explicitly
+  whether an item amount includes tax, which v0 did not. Orders are polled (Amazon only pushes via SQS/EventBridge, not
+  HTTPS) with `lastUpdatedAfter`; the sustained limit is one `searchOrders` call every ~3 minutes, so the 15 minute cron
+  never throttles and a 429 is handled without waiting.
+- **Listings and stock**: Listings Items API (`searchListingsItems`, `patchListingsItem` on `fulfillment_availability`).
+- **Shipments**: `shipmentConfirmation` (one call per package, tracking number required).
+
+How we beat the field:
+1. Marketplaces are read from Amazon when you press Test connection; nobody types marketplace ids.
+2. FBA done right: orders Amazon ships are taken from a separate FBA warehouse and booked as delivered, and FBA listings
+   are flagged so Odoo's stock can never overwrite them.
+3. A refused SKU (closed listing, wrong product type) is reported by name as one visible problem while the rest of the
+   stock update goes through.
+4. A missing app role gives a message saying which role to tick; it does not disconnect the store.
+5. No per-order fees: it is a normal module.
+
+Not in this version: refunds/returns (Finances API), FBA inventory pulled into Odoo, settlement reconciliation, creating
+listings from Odoo, B2B/VAT invoicing data, SQS notifications.
+
+## PrestaShop (added 2026-10-29)
+
+Competitors (Odoo 19 listings): Webkul $199 (two modules; credit slips only on 19/20), VentorTech PRO $568
+(refunds "coming soon", webhooks need an extra PrestaShop module, mrp dependency), Globalteckz $248, Jupical $233,
+TeqStars $250. Only Webkul syncs credit slips; none of the others do, and all of them sync on a schedule.
+
+What we build against: the PrestaShop Webservice (basic auth with the key as user, `output_format=JSON`, `filter`,
+`display=full`, `limit=offset,count`; writes are XML only). We beat the field on:
+1. Credit slips become credit notes, by returned quantity, and a slip on an otherwise unchanged order is still picked up.
+2. Shop time zone read from the shop (PrestaShop dates carry no offset) so order sync windows are right.
+3. Bulk lookups per batch of orders (customers, addresses) instead of three calls per order.
+4. Stock refused by name (advanced stock management, deleted product) without blocking the rest.
+5. Tracking number plus order status in one step, and no second status change when the order is already shipped.
+6. Key permissions are explained resource by resource in the error message.
+
+## eBay (added 2026-10-29)
+
+Competitors (Odoo 19 listings): Emipro `ebay_ept` $705 (imports only shipped orders of the last 90 days, no new-listing
+export in v19, no refunds mentioned; reviewers report variation quantities wrong, exports failing silently, older listings
+without SKU not importable, outdated authentication), TeqStars `ebay` $414 (Trading API for listings and stock, refunds and
+legacy listings not addressed, refresh token needs re-authorising every ~18 months).
+
+What we build against: Sell Fulfillment API (`getOrders` with `lastmodifieddate` filter, 200 per page; `createShippingFulfillment`)
+and Sell Inventory API (`inventory_item`, `bulk_update_price_quantity`), OAuth refresh token -> 2 hour access token.
+Where we beat the field:
+1. Paid orders are imported straight away, not only after shipping.
+2. VAT-inclusive (UK/EU) and tax-on-top (US) orders are told apart from the order totals; marketplace-collected tax is left out.
+3. Lines of old listings without SKU still import (product found or created from the order line).
+4. Refunds become credit notes, by line when a whole line was refunded.
+5. Stock refusals are named; a dead refresh token says how long they last and how to renew.
+
+## Magento 2 (added 2026-10-29)
+
+Competitors (Odoo 19 listings): Webkul $199 (MSI and multi-store only through paid extensions), VentorTech Connector PRO
+$582 (configurable products, MSI, queues; some real-time flows need a Magento extension), Emipro $625 (MSI, refunds and
+credit notes, webhooks), Odoo IN $199 (SKU mapping, admin token), SDLC (price on request, multi-store, queues).
+Typical gaps: extra Magento-side modules for live sync, paid extensions for MSI, one purchase per Odoo version.
+
+What we build against: REST `/rest/{store_code}/V1` with an integration token; `orders` and `creditmemos` searched by
+`updated_at`/`created_at`; MSI `inventory/source-items` (legacy `stockItems/1` when MSI is off); `order/{id}/ship`.
+Where we beat the field:
+1. Nothing to install in Magento; MSI sources become Odoo locations automatically.
+2. Configurable products are booked as the chosen variant, with discount, shipping tax and shipping discount.
+3. Credit memos become credit notes for the returned quantity only, even when the order itself did not change.
+4. One unknown SKU no longer fails a whole stock batch: it is found by retrying one by one and named.
+5. Missing API permissions are named in plain words (which resource) instead of "not authorized".
+
+## Mailchimp and Brevo (added 2026-10-29)
+
+Competitors (Odoo 19 listings): Mailchimp: TeqStars $393 (two-way contacts, live webhooks, e-commerce export, campaign stats,
+field mapping; needs the Sales and Invoicing apps, proprietary licence, no trial), Cybrosys (imports lists, members,
+templates and campaigns; needs the `mailchimp-marketing` Python package and a server restart; daily sync). Brevo: BrowseInfo
+$55 (imports and exports contacts, lists, campaigns; not for Odoo Online; a reviewer could not swap a wrongly bought version).
+Typical gaps: unsubscribe handling is not described as a rule, no view of contacts the provider refused, a package or
+restart to install, daily rather than frequent sync.
+
+What we build against: Mailchimp `lists/{id}/members` (`since_last_changed`), batch `POST lists/{id}` with `update_existing`,
+`reports`, list webhooks; Brevo `contacts/lists/{id}/contacts` (`modifiedSince`), `contacts/import`, list `remove`,
+`emailCampaigns`, marketing webhooks.
+Where we beat the field:
+1. Unsubscribes win in both directions and nobody is ever subscribed again behind their back.
+2. Only changes travel (fingerprint per contact), every 15 minutes, or within seconds with a webhook.
+3. Refused addresses are listed with the provider's reason, and retried when edited.
+4. No extra Python package, no restart, no dependency on Sales or Invoicing.
+5. One shared engine: the next provider is a small adapter.
+Not yet: e-commerce export to Mailchimp, templates, segments and tags, custom field mapping.
+
+## Power BI (added 2026-10-29)
+
+Competitors (Odoo 19 listings): ECOSIRE $481 (push datasets with delta mode, a custom pull API, Azure AD service principal,
+blueprints; needs `msal`, Pro workspace and five Odoo apps), Creyox $395 (Power BI Desktop data source with a token, Fabric
+services, embedding, pipelines; Premium for pipelines), Weblytic Labs $99 (workspace, dataset and tables from Odoo, push on a
+schedule, importing reports into Odoo; needs Sales, Website, eCommerce and Invoicing).
+Typical gaps: every one needs an Azure app registration even to read data, a custom connector or API instead of the
+standard OData feed Power BI already understands, "delta" push cannot update a changed row (push datasets only append), and
+one-off blueprints that dump all columns.
+
+What we build against: OData v4 JSON (`$metadata`, `$filter`, `$select`, `$orderby`, `$top`, `$skip`, `$count`, server paging)
+read by Power BI's built-in OData connector; for push, `datasets`, `tables/{name}/rows` with an Azure AD client-credentials token.
+Where we beat the field:
+1. Nothing to register in Azure to read data: an address and an access key (stored hashed, shown once, expiring, revocable).
+2. The standard OData feed, so Power BI folds filters and columns to Odoo and refreshes on its own schedule.
+3. Rights are the feed user's: ACL and record rules, unreadable columns are never exposed.
+4. Relations and choices arrive as id plus name and code plus label, ready for joins and charts.
+5. Push replaces rows (no duplicates) and updates table columns in place so reports stay connected.
+Not yet: Direct Query, building reports, embedding reports inside Odoo.
+
+## Claude (added 2026-10-29)
+
+Competitors (Odoo 19 listings): Serpent $122, Merkago $88, EASYMOB $112, all "MCP server for Odoo" style apps.
+Gaps we design against (what a raw MCP passthrough tends to leave open): one all-powerful token, a full ORM passthrough (any model, any method), no per-model write rights,
+no record filters, no audit trail, and no hint to Claude about what it may not do (it finds out by failing).
+
+What we build against: Model Context Protocol over streamable HTTP (JSON-RPC 2.0, `initialize`, `tools/list`, `tools/call`),
+bearer access keys, tool annotations (`readOnlyHint`, `destructiveHint`) and `structuredContent` results.
+Where we beat the field:
+1. Keys start read only; create, change, delete and button presses are separate switches, per model.
+2. A filter per model narrows what Claude sees and changes, on top of the user's own access rights and record rules.
+3. Tools a key cannot use are not offered, so Claude does not try; refusals say what to ask the administrator for.
+4. Credentials and settings models and secret-looking fields are closed whatever the key says.
+5. Audit log of every call, expiry, replaceable key stored as a fingerprint, daily limit.
+6. Purpose-built tools (search with paging and totals, grouped sums, describe) instead of one raw `execute_kw`.
+Not yet: OAuth 2.1 sign-in (needed by claude.ai custom connectors), prompts and resources, an "Ask Claude" button inside Odoo.
 
 ## QuickBooks Online (added 2026-10-29)
 

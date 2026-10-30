@@ -7,14 +7,36 @@ Connectors that link Odoo 19 (Community and Enterprise) with e-commerce platform
 | [`channel_connector_base`](channel_connector_base/readme/DESCRIPTION.md) | Shared engine: stores, job queue and sync log, order workflows, stock sync, webhooks, setup wizard | ready |
 | [`channel_shopify`](channel_shopify/readme/DESCRIPTION.md) | Shopify (Admin GraphQL API) | ready |
 | [`channel_woocommerce`](channel_woocommerce/readme/DESCRIPTION.md) | WooCommerce (REST API v3) | ready |
+| [`channel_amazon`](channel_amazon/readme/DESCRIPTION.md) | Amazon Selling Partner API (merchant-fulfilled and FBA orders) | ready, not yet run against a live seller account |
+| [`channel_prestashop`](channel_prestashop/readme/DESCRIPTION.md) | PrestaShop Webservice (orders, credit slips, combinations, stock, tracking) | ready, not yet run against a live shop |
+| [`channel_ebay`](channel_ebay/readme/DESCRIPTION.md) | eBay REST (Sell Fulfillment + Inventory): orders, refunds, stock, shipments | ready, not yet run against a live account |
+| [`channel_magento`](channel_magento/readme/DESCRIPTION.md) | Magento 2 / Adobe Commerce REST: orders, credit memos, products, MSI stock, shipments | ready, not yet run against a live shop |
+
+Email marketing (independent of the sales channel modules):
+
+| Module | What it does | Status |
+|---|---|---|
+| [`marketing_connector_base`](marketing_connector_base/readme/DESCRIPTION.md) | Shared engine: audiences to mailing lists, contacts, unsubscribes both ways, campaign results, webhooks | ready |
+| [`marketing_mailchimp`](marketing_mailchimp/readme/DESCRIPTION.md) | Mailchimp Marketing API v3 | ready, not yet run against a live account |
+| [`marketing_brevo`](marketing_brevo/readme/DESCRIPTION.md) | Brevo API v3 | ready, not yet run against a live account |
+
+Reporting:
+
+| Module | What it does | Status |
+|---|---|---|
+| [`powerbi_connector`](powerbi_connector/readme/DESCRIPTION.md) | Power BI reads Odoo through an OData feed with an access key; optional push dataset | ready, not yet run against Power BI itself |
+
+AI:
+
+| Module | What it does | Status |
+|---|---|---|
+| [`claude_mcp_server`](claude_mcp_server/readme/DESCRIPTION.md) | Claude reads and (if allowed) updates Odoo through an MCP server: per-key models, record filters, audit log, daily limit | ready, not yet run with Claude itself |
 
 Accounting:
 
 | Module | What it does | Status |
 |---|---|---|
 | [`quickbooks_connector`](quickbooks_connector/readme/DESCRIPTION.md) | QuickBooks Online: invoices, bills, credit notes and payments out; customers, vendors and payments in | ready, not yet run against QuickBooks itself |
-
-Planned: Amazon, Claude, PrestaShop, eBay, Power BI, Magento 2, Brevo, Mailchimp.
 
 ## Design
 

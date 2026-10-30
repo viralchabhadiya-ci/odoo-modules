@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_powerbi_feed_manager,powerbi.feed manager,model_powerbi_feed,group_powerbi_manager,1,1,1,1
+access_powerbi_entity_manager,powerbi.entity manager,model_powerbi_entity,group_powerbi_manager,1,1,1,1
+access_powerbi_token_wizard_manager,powerbi.token.wizard manager,model_powerbi_token_wizard,group_powerbi_manager,1,1,1,1

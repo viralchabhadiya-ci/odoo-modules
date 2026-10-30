@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="channel_store_view_form_prestashop" model="ir.ui.view">
+        <field name="name">channel.store.form.prestashop</field>
+        <field name="model">channel.store</field>
+        <field name="inherit_id" ref="channel_connector_base.channel_store_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='connection']" position="inside">
+                <group string="PrestaShop" invisible="channel_type != 'prestashop'">
+                    <field name="prestashop_timezone"/>
+                    <field name="prestashop_language" readonly="1"/>
+                    <div colspan="2" class="text-muted">
+                        PrestaShop saves order dates in the shop's own time zone. Odoo reads it from the shop when you test the connection.
+                    </div>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>
