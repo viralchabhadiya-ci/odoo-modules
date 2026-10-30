@@ -45,7 +45,9 @@ class ChannelStore(models.Model):
         if not product and barcode:
             product = Product.search([("barcode", "=", barcode)], limit=1)
         if product and line.get("variant_id"):
-            self._set_mapping(product, line["variant_id"], line.get("inventory_ref"))
+            self._set_mapping(
+                product, line["variant_id"], line.get("inventory_ref"), push_stock=line.get("push_stock")
+            )
         return product
 
     def _create_product_from_line(self, line):
@@ -61,7 +63,9 @@ class ChannelStore(models.Model):
             }
         )
         if line.get("variant_id"):
-            self._set_mapping(product, line["variant_id"], line.get("inventory_ref"))
+            self._set_mapping(
+                product, line["variant_id"], line.get("inventory_ref"), push_stock=line.get("push_stock")
+            )
         return product
 
     def _process_product_data(self, data):
@@ -161,9 +165,7 @@ class ChannelStore(models.Model):
         if len(variants) <= 1 and len(template.product_variant_ids) == 1:
             variant = variants[0] if variants else None
             if variant and variant.get("external_id"):
-                self._set_mapping(
-                    template.product_variant_id, variant["external_id"], variant.get("inventory_ref")
-                )
+                self._link_variant(template.product_variant_id, variant)
             return
         for variant in variants:
             product = self._find_product(
@@ -196,7 +198,14 @@ class ChannelStore(models.Model):
                 values["barcode"] = variant["barcode"]
             if values:
                 product.write(values)
-            self._set_mapping(product, variant["external_id"], variant.get("inventory_ref"))
+            self._link_variant(product, variant)
+
+    def _link_variant(self, product, variant):
+        mapping = self._set_mapping(
+            product, variant["external_id"], variant.get("inventory_ref"), push_stock=variant.get("push_stock")
+        )
+        if variant.get("push_stock") is not None and mapping.push_stock != variant["push_stock"]:
+            mapping.push_stock = variant["push_stock"]
 
     def _download_image(self, url):
         if not url:

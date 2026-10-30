@@ -1,4 +1,4 @@
-# Shopify + WooCommerce Odoo connectors: market research and plan
+# Shopify, WooCommerce and Amazon Odoo connectors: market research and plan
 
 Date: 2026-10-29. Target: Odoo 19.0 (Community + Enterprise).
 
@@ -46,3 +46,32 @@ The same base will be reused for Amazon, PrestaShop, eBay, Magento 2, etc.
 
 Sources: webkul.com/blog/best-odoo-shopify-connector, webkul.com/blog/best-odoo-woocommerce-connectors,
 apps.odoo.com woo_commerce_ept listing, appnavigator.io Webkul Shopify connector reviews.
+
+## Amazon (added 2026-10-29)
+
+Competitor: Emipro `amazon_ept` v19, about $614 plus IAP packs (free for 3 months, then 99 EUR a month or 999 EUR a year).
+It covers FBM, FBA and mixed accounts, many marketplaces, product import, FBM stock export, FBA live inventory,
+returns and refunds, inbound shipments, removal orders and settlement reports. Common complaints: billing that is hard
+to predict (IAP fees), slow support, long configuration.
+
+What we build against, from the Selling Partner API documentation:
+- **Auth**: Login with Amazon refresh token (client id + secret + refresh token). Self-authorised private apps need no AWS
+  account, IAM user or request signing any more, so setup is three pasted values and a Seller ID.
+- **Orders**: Orders API v2026-01-01 (`searchOrders`, `getOrder`). v0 is being replaced; the new API says explicitly
+  whether an item amount includes tax, which v0 did not. Orders are polled (Amazon only pushes via SQS/EventBridge, not
+  HTTPS) with `lastUpdatedAfter`; the sustained limit is one `searchOrders` call every ~3 minutes, so the 15 minute cron
+  never throttles and a 429 is handled without waiting.
+- **Listings and stock**: Listings Items API (`searchListingsItems`, `patchListingsItem` on `fulfillment_availability`).
+- **Shipments**: `shipmentConfirmation` (one call per package, tracking number required).
+
+How we beat the field:
+1. Marketplaces are read from Amazon when you press Test connection; nobody types marketplace ids.
+2. FBA done right: orders Amazon ships are taken from a separate FBA warehouse and booked as delivered, and FBA listings
+   are flagged so Odoo's stock can never overwrite them.
+3. A refused SKU (closed listing, wrong product type) is reported by name as one visible problem while the rest of the
+   stock update goes through.
+4. A missing app role gives a message saying which role to tick; it does not disconnect the store.
+5. No per-order fees: it is a normal module.
+
+Not in this version: refunds/returns (Finances API), FBA inventory pulled into Odoo, settlement reconciliation, creating
+listings from Odoo, B2B/VAT invoicing data, SQS notifications.

@@ -109,7 +109,7 @@
                                     <field name="webhook_secret" password="True"/>
                                 </group>
                             </group>
-                            <group string="Real-time orders (webhooks)">
+                            <group string="Real-time orders (webhooks)" invisible="not supports_webhooks">
                                 <field name="webhooks_registered" widget="boolean_toggle" readonly="1"/>
                                 <field name="webhook_url" widget="CopyClipboardChar"/>
                                 <div colspan="2" class="text-muted">
@@ -161,7 +161,7 @@
                                     <field name="stock_safety"/>
                                     <field name="last_stock_sync"/>
                                 </group>
-                                <group string="Shipments">
+                                <group string="Shipments" name="shipments">
                                     <field name="auto_push_fulfillment" widget="boolean_toggle"/>
                                 </group>
                             </group>

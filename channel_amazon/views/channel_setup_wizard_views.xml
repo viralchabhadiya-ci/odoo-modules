@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="channel_setup_wizard_view_form_amazon" model="ir.ui.view">
+        <field name="name">channel.setup.wizard.form.amazon</field>
+        <field name="model">channel.setup.wizard</field>
+        <field name="inherit_id" ref="channel_connector_base.channel_setup_wizard_view_form"/>
+        <field name="arch" type="xml">
+            <group name="credentials" position="inside">
+                <field name="amazon_region" invisible="channel_type != 'amazon'" required="channel_type == 'amazon'"/>
+                <field name="amazon_seller_id" placeholder="A1B2C3D4E5F6G7" invisible="channel_type != 'amazon'" required="channel_type == 'amazon'"/>
+                <field name="api_key" string="Client ID" password="True" invisible="channel_type != 'amazon'"/>
+                <field name="api_secret" string="Client secret" password="True" invisible="channel_type != 'amazon'"/>
+                <field name="amazon_refresh_token" password="True" invisible="channel_type != 'amazon'"/>
+            </group>
+        </field>
+    </record>
+</odoo>
