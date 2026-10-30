@@ -90,3 +90,19 @@ What we build against: the PrestaShop Webservice (basic auth with the key as use
 4. Stock refused by name (advanced stock management, deleted product) without blocking the rest.
 5. Tracking number plus order status in one step, and no second status change when the order is already shipped.
 6. Key permissions are explained resource by resource in the error message.
+
+## eBay (added 2026-10-29)
+
+Competitors (Odoo 19 listings): Emipro `ebay_ept` $705 (imports only shipped orders of the last 90 days, no new-listing
+export in v19, no refunds mentioned; reviewers report variation quantities wrong, exports failing silently, older listings
+without SKU not importable, outdated authentication), TeqStars `ebay` $414 (Trading API for listings and stock, refunds and
+legacy listings not addressed, refresh token needs re-authorising every ~18 months).
+
+What we build against: Sell Fulfillment API (`getOrders` with `lastmodifieddate` filter, 200 per page; `createShippingFulfillment`)
+and Sell Inventory API (`inventory_item`, `bulk_update_price_quantity`), OAuth refresh token -> 2 hour access token.
+Where we beat the field:
+1. Paid orders are imported straight away, not only after shipping.
+2. VAT-inclusive (UK/EU) and tax-on-top (US) orders are told apart from the order totals; marketplace-collected tax is left out.
+3. Lines of old listings without SKU still import (product found or created from the order line).
+4. Refunds become credit notes, by line when a whole line was refunded.
+5. Stock refusals are named; a dead refresh token says how long they last and how to renew.

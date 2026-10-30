@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="channel_store_view_form_ebay" model="ir.ui.view">
+        <field name="name">channel.store.form.ebay</field>
+        <field name="model">channel.store</field>
+        <field name="inherit_id" ref="channel_connector_base.channel_store_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='connection']" position="inside">
+                <group string="eBay" invisible="channel_type != 'ebay'">
+                    <field name="ebay_refresh_token" password="True" groups="channel_connector_base.group_channel_manager"/>
+                    <field name="ebay_sandbox"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>
