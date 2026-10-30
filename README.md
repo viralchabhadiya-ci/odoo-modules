@@ -20,7 +20,13 @@ Email marketing (independent of the sales channel modules):
 | [`marketing_mailchimp`](marketing_mailchimp/readme/DESCRIPTION.md) | Mailchimp Marketing API v3 | ready, not yet run against a live account |
 | [`marketing_brevo`](marketing_brevo/readme/DESCRIPTION.md) | Brevo API v3 | ready, not yet run against a live account |
 
-Planned: Claude, QuickBooks, Power BI.
+Reporting:
+
+| Module | What it does | Status |
+|---|---|---|
+| [`powerbi_connector`](powerbi_connector/readme/DESCRIPTION.md) | Power BI reads Odoo through an OData feed with an access key; optional push dataset | ready, not yet run against Power BI itself |
+
+Planned: Claude, QuickBooks.
 
 ## Design
 
