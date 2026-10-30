@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="claude_mcp_token_view_list" model="ir.ui.view">
+        <field name="name">claude.mcp.token.list</field>
+        <field name="model">claude.mcp.token</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="user_id"/>
+                <field name="read_only"/>
+                <field name="token_hint"/>
+                <field name="token_expiry"/>
+                <field name="calls_today"/>
+                <field name="last_used"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="claude_mcp_token_view_form" model="ir.ui.view">
+        <field name="name">claude.mcp.token.form</field>
+        <field name="model">claude.mcp.token</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_new_token" type="object" string="Create access key" class="btn-primary"
+                            invisible="not id or token_hint"/>
+                    <button name="action_new_token" type="object" string="Replace access key" invisible="not token_hint"
+                            confirm="The current key stops working at once. Continue?"/>
+                    <button name="action_revoke_token" type="object" string="Revoke access key" invisible="not token_hint"
+                            confirm="Claude will no longer be able to reach Odoo with this key. Continue?"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="active" invisible="1"/>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="e.g. Claude Desktop of Maria"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="user_id"/>
+                            <field name="token_expiry"/>
+                            <field name="daily_limit"/>
+                        </group>
+                        <group>
+                            <field name="url" widget="CopyClipboardChar" invisible="not id"/>
+                            <field name="token_hint" invisible="not token_hint"/>
+                            <field name="last_used"/>
+                            <field name="calls_today"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-info" role="status" invisible="not id">
+                        <b>Claude Code:</b> create the key, then run the command shown. <b>Claude Desktop:</b> paste the
+                        configuration shown into its settings (it uses <code>mcp-remote</code>, which needs Node.js).
+                        Odoo must be reachable from where Claude runs.
+                    </div>
+                    <group string="What Claude may do">
+                        <field name="read_only"/>
+                        <field name="allow_actions" invisible="read_only"/>
+                        <field name="access_all_models"/>
+                    </group>
+                    <field name="access_ids">
+                        <list editable="bottom">
+                            <field name="model_id" options="{'no_create': True}"/>
+                            <field name="can_create" column_invisible="parent.read_only"/>
+                            <field name="can_write" column_invisible="parent.read_only"/>
+                            <field name="can_delete" column_invisible="parent.read_only"/>
+                            <field name="model_name" column_invisible="True"/>
+                            <field name="domain" widget="domain" options="{'model': 'model_name'}"/>
+                        </list>
+                    </field>
+                    <notebook>
+                        <page string="Audit log" name="log">
+                            <field name="log_ids" readonly="1">
+                                <list limit="50">
+                                    <field name="create_date" string="When"/>
+                                    <field name="tool"/>
+                                    <field name="model_name"/>
+                                    <field name="summary"/>
+                                    <field name="success" widget="boolean"/>
+                                    <field name="error"/>
+                                    <field name="duration_ms"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="claude_mcp_log_view_list" model="ir.ui.view">
+        <field name="name">claude.mcp.log.list</field>
+        <field name="model">claude.mcp.log</field>
+        <field name="arch" type="xml">
+            <list create="0" edit="0" decoration-danger="not success">
+                <field name="create_date" string="When"/>
+                <field name="token_id"/>
+                <field name="user_id"/>
+                <field name="tool"/>
+                <field name="model_name"/>
+                <field name="summary"/>
+                <field name="success" widget="boolean"/>
+                <field name="error"/>
+                <field name="duration_ms"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="claude_mcp_log_view_search" model="ir.ui.view">
+        <field name="name">claude.mcp.log.search</field>
+        <field name="model">claude.mcp.log</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="token_id"/>
+                <field name="tool"/>
+                <field name="model_name"/>
+                <filter name="failed" string="Refused or failed" domain="[('success', '=', False)]"/>
+                <filter name="changes" string="Changes" domain="[('tool', 'in', ['odoo_create', 'odoo_write', 'odoo_delete', 'odoo_run_action'])]"/>
+                <group>
+                    <filter name="by_key" string="Key" context="{'group_by': 'token_id'}"/>
+                    <filter name="by_tool" string="Tool" context="{'group_by': 'tool'}"/>
+                    <filter name="by_day" string="Day" context="{'group_by': 'create_date:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="claude_mcp_token_wizard_view_form" model="ir.ui.view">
+        <field name="name">claude.mcp.token.wizard.form</field>
+        <field name="model">claude.mcp.token.wizard</field>
+        <field name="arch" type="xml">
+            <form create="0">
+                <div class="alert alert-warning" role="alert">
+                    Copy the access key now. Odoo keeps only a fingerprint of it and cannot show it again.
+                </div>
+                <group>
+                    <field name="url" widget="CopyClipboardChar"/>
+                    <field name="token" widget="CopyClipboardChar"/>
+                    <field name="command" widget="CopyClipboardText"/>
+                    <field name="config" widget="CopyClipboardText"/>
+                </group>
+                <footer>
+                    <button string="Done" special="cancel" class="btn-primary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="claude_mcp_token_action" model="ir.actions.act_window">
+        <field name="name">Access keys</field>
+        <field name="res_model">claude.mcp.token</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Let Claude work with your Odoo data</p>
+            <p>Create an access key, choose the models Claude may use and whether it may change anything, then connect Claude with the command or configuration Odoo shows.</p>
+        </field>
+    </record>
+
+    <record id="claude_mcp_log_action" model="ir.actions.act_window">
+        <field name="name">Audit log</field>
+        <field name="res_model">claude.mcp.log</field>
+        <field name="view_mode">list</field>
+        <field name="context">{'search_default_changes': 0}</field>
+    </record>
+
+    <menuitem id="menu_claude_mcp_root" name="Claude" sequence="131" groups="group_mcp_manager"/>
+    <menuitem id="menu_claude_mcp_tokens" name="Access keys" parent="menu_claude_mcp_root" action="claude_mcp_token_action" sequence="10"/>
+    <menuitem id="menu_claude_mcp_log" name="Audit log" parent="menu_claude_mcp_root" action="claude_mcp_log_action" sequence="20"/>
+</odoo>

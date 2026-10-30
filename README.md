@@ -26,7 +26,13 @@ Reporting:
 |---|---|---|
 | [`powerbi_connector`](powerbi_connector/readme/DESCRIPTION.md) | Power BI reads Odoo through an OData feed with an access key; optional push dataset | ready, not yet run against Power BI itself |
 
-Planned: Claude, QuickBooks.
+AI:
+
+| Module | What it does | Status |
+|---|---|---|
+| [`claude_mcp_server`](claude_mcp_server/readme/DESCRIPTION.md) | Claude reads and (if allowed) updates Odoo through an MCP server: per-key models, record filters, audit log, daily limit | ready, not yet run with Claude itself |
+
+Planned: QuickBooks.
 
 ## Design
 

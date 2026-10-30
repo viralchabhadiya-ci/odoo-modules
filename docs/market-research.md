@@ -162,3 +162,20 @@ Where we beat the field:
 4. Relations and choices arrive as id plus name and code plus label, ready for joins and charts.
 5. Push replaces rows (no duplicates) and updates table columns in place so reports stay connected.
 Not yet: Direct Query, building reports, embedding reports inside Odoo.
+
+## Claude (added 2026-10-29)
+
+Competitors (Odoo 19 listings): Serpent $122, Merkago $88, EASYMOB $112, all "MCP server for Odoo" style apps.
+Gaps we design against (what a raw MCP passthrough tends to leave open): one all-powerful token, a full ORM passthrough (any model, any method), no per-model write rights,
+no record filters, no audit trail, and no hint to Claude about what it may not do (it finds out by failing).
+
+What we build against: Model Context Protocol over streamable HTTP (JSON-RPC 2.0, `initialize`, `tools/list`, `tools/call`),
+bearer access keys, tool annotations (`readOnlyHint`, `destructiveHint`) and `structuredContent` results.
+Where we beat the field:
+1. Keys start read only; create, change, delete and button presses are separate switches, per model.
+2. A filter per model narrows what Claude sees and changes, on top of the user's own access rights and record rules.
+3. Tools a key cannot use are not offered, so Claude does not try; refusals say what to ask the administrator for.
+4. Credentials and settings models and secret-looking fields are closed whatever the key says.
+5. Audit log of every call, expiry, replaceable key stored as a fingerprint, daily limit.
+6. Purpose-built tools (search with paging and totals, grouped sums, describe) instead of one raw `execute_kw`.
+Not yet: OAuth 2.1 sign-in (needed by claude.ai custom connectors), prompts and resources, an "Ask Claude" button inside Odoo.
