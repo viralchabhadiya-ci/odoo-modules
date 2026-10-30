@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="powerbi_feed_view_list" model="ir.ui.view">
+        <field name="name">powerbi.feed.list</field>
+        <field name="model">powerbi.feed</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="user_id"/>
+                <field name="entity_count" string="Tables"/>
+                <field name="token_hint"/>
+                <field name="last_used"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="powerbi_feed_view_form" model="ir.ui.view">
+        <field name="name">powerbi.feed.form</field>
+        <field name="model">powerbi.feed</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_new_token" type="object" string="Create access key" class="btn-primary"
+                            invisible="not id or token_hint"/>
+                    <button name="action_new_token" type="object" string="Replace access key" invisible="not token_hint"
+                            confirm="The current key stops working at once. Continue?"/>
+                    <button name="action_revoke_token" type="object" string="Revoke access key" invisible="not token_hint"
+                            confirm="Power BI will no longer be able to read this feed. Continue?"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="active" invisible="1"/>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="e.g. Management dashboards"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="user_id"/>
+                            <field name="token_expiry"/>
+                            <field name="page_size"/>
+                        </group>
+                        <group>
+                            <field name="url" widget="CopyClipboardChar" invisible="not id"/>
+                            <field name="token_hint" invisible="not token_hint"/>
+                            <field name="last_used"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-info" role="status" invisible="not id">
+                        <b>In Power BI Desktop:</b> Get data &gt; OData feed &gt; paste the address &gt; Basic: any user name,
+                        the access key as password &gt; pick the tables. Refresh schedules in the Power BI service use the
+                        same address and key (Odoo must be reachable from the internet).
+                    </div>
+                    <div class="mb-2" invisible="not id">
+                        <button name="action_add_sales" type="object" string="Add sales tables" class="btn btn-secondary me-1"/>
+                        <button name="action_add_accounting" type="object" string="Add accounting tables" class="btn btn-secondary me-1"/>
+                        <button name="action_add_inventory" type="object" string="Add inventory tables" class="btn btn-secondary me-1"/>
+                        <button name="action_add_purchases" type="object" string="Add purchase tables" class="btn btn-secondary"/>
+                    </div>
+                    <field name="entity_ids">
+                        <list editable="bottom">
+                            <field name="sequence" widget="handle"/>
+                            <field name="model_id" options="{'no_create': True}"/>
+                            <field name="name"/>
+                            <field name="field_ids" widget="many2many_tags" options="{'no_create': True}" placeholder="All ordinary columns"/>
+                            <field name="model_name" column_invisible="True"/>
+                            <field name="domain" widget="domain" options="{'model': 'model_name'}"/>
+                        </list>
+                    </field>
+                    <separator string="Send a copy to the Power BI service (optional)"/>
+                    <p class="text-muted">
+                        Use this when Odoo cannot be reached from the internet. It needs an Azure app registration
+                        added to a Power BI workspace as Member; the feed above is not needed for it.
+                    </p>
+                    <group>
+                        <group>
+                            <field name="push_enabled"/>
+                            <field name="pbi_tenant_id" invisible="not push_enabled" required="push_enabled"/>
+                            <field name="pbi_client_id" invisible="not push_enabled" required="push_enabled"/>
+                            <field name="pbi_client_secret" password="True" invisible="not push_enabled"/>
+                            <field name="pbi_workspace_id" invisible="not push_enabled" required="push_enabled"/>
+                        </group>
+                        <group invisible="not push_enabled">
+                            <field name="push_interval"/>
+                            <field name="last_push"/>
+                            <field name="pbi_dataset_id"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-danger" role="alert" invisible="not push_message">
+                        <field name="push_message" nolabel="1"/>
+                    </div>
+                    <button name="action_push_now" type="object" string="Send now" class="btn btn-secondary" invisible="not push_enabled or not id"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="powerbi_token_wizard_view_form" model="ir.ui.view">
+        <field name="name">powerbi.token.wizard.form</field>
+        <field name="model">powerbi.token.wizard</field>
+        <field name="arch" type="xml">
+            <form create="0">
+                <div class="alert alert-warning" role="alert">
+                    Copy the access key now. Odoo keeps only a fingerprint of it and cannot show it again.
+                </div>
+                <group>
+                    <field name="url" widget="CopyClipboardChar"/>
+                    <field name="token" widget="CopyClipboardChar"/>
+                </group>
+                <p class="text-muted">
+                    In Power BI Desktop choose Get data &gt; OData feed, paste the address, then Basic: type any user name
+                    and the access key as the password.
+                </p>
+                <footer>
+                    <button string="Done" special="cancel" class="btn-primary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="powerbi_feed_action" model="ir.actions.act_window">
+        <field name="name">Power BI feeds</field>
+        <field name="res_model">powerbi.feed</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Let Power BI read your Odoo data</p>
+            <p>Create a feed, add sales, accounting or inventory tables, create an access key and paste the address into Power BI.</p>
+        </field>
+    </record>
+
+    <menuitem id="menu_powerbi_root" name="Power BI" sequence="130" groups="group_powerbi_manager"/>
+    <menuitem id="menu_powerbi_feeds" name="Feeds" parent="menu_powerbi_root" action="powerbi_feed_action" sequence="10"/>
+</odoo>

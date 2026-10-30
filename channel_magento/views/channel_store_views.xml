@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="channel_store_view_form_magento" model="ir.ui.view">
+        <field name="name">channel.store.form.magento</field>
+        <field name="model">channel.store</field>
+        <field name="inherit_id" ref="channel_connector_base.channel_store_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='connection']" position="inside">
+                <group string="Magento" invisible="channel_type != 'magento'">
+                    <field name="magento_store_code"/>
+                    <field name="magento_msi" readonly="1"/>
+                    <div colspan="2" class="text-muted">
+                        With Multi-Source Inventory every Magento source is listed under Stock and can be matched with one Odoo warehouse.
+                    </div>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

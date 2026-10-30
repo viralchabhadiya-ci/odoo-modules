@@ -60,6 +60,13 @@ class ChannelStore(models.Model):
             [("company_id", "=", self.env.company.id)], limit=1
         ),
     )
+    fulfilled_warehouse_id = fields.Many2one(
+        "stock.warehouse",
+        string="Warehouse for orders the channel ships",
+        domain="[('company_id', '=', company_id)]",
+        help="Orders the channel fulfils itself (for example Amazon FBA) are taken from this "
+        "warehouse and marked as delivered, without sending a shipment back.",
+    )
     pricelist_id = fields.Many2one("product.pricelist", string="Pricelist")
     team_id = fields.Many2one("crm.team", string="Sales Team")
     shipping_product_id = fields.Many2one(
@@ -126,6 +133,7 @@ class ChannelStore(models.Model):
     currency_id = fields.Many2one(related="company_id.currency_id")
     webhook_url = fields.Char(compute="_compute_webhook_url")
     webhooks_registered = fields.Boolean(copy=False, readonly=True)
+    supports_webhooks = fields.Boolean(compute="_compute_webhook_url")
 
     @api.depends("job_ids.state", "mapping_ids")
     def _compute_counts(self):
@@ -170,6 +178,7 @@ class ChannelStore(models.Model):
                 if store.id and store.channel_type
                 else False
             )
+            store.supports_webhooks = bool(store.channel_type) and store._has_hook("register_webhooks")
 
     # -- generic helpers --------------------------------------------------------
 
@@ -191,7 +200,8 @@ class ChannelStore(models.Model):
         )
         return self.env[res_model].browse(mapping.res_id).exists() if mapping else self.env[res_model]
 
-    def _set_mapping(self, record, external_id, external_ref=None):
+    def _set_mapping(self, record, external_id, external_ref=None, push_stock=None):
+        """Link `record` to `external_id`. `push_stock` only applies when the link is created."""
         self.ensure_one()
         mapping = self.env["channel.mapping"].search(
             [
@@ -207,6 +217,8 @@ class ChannelStore(models.Model):
         if mapping:
             mapping.write(values)
             return mapping
+        if push_stock is not None:
+            values["push_stock"] = push_stock
         return self.env["channel.mapping"].create(
             {
                 "store_id": self.id,
@@ -356,32 +368,41 @@ class ChannelStore(models.Model):
 
         The job is reused while the problem lasts and closed once the task works again."""
         self.ensure_one()
-        key = f"store:{label}"
-        Job = self.env["channel.job"]
-        open_job = Job.search(
-            [("store_id", "=", self.id), ("dedupe_key", "=", key), ("state", "!=", "done")], limit=1
-        )
         try:
             with self.env.cr.savepoint():
                 result = func()
         except Exception as exc:  # noqa: BLE001 - recorded as a failed job
             _logger.warning("Store %s: %s failed", self.name, label, exc_info=True)
-            job = open_job or Job.create(
-                {
-                    "name": _("Sync failed: %s", label.replace("_", " ")),
-                    "store_id": self.id,
-                    "job_type": "other",
-                    "dedupe_key": key,
-                }
-            )
-            job._register_failure(exc)
-            job.write({"state": "failed", "retry_count": job.max_retries})
+            self._report_problem(label, exc)
             if isinstance(exc, ChannelAuthError) and self.state == "connected":
                 self.state = "error"
                 self.connection_message = exc.args[0] if exc.args else str(exc)
             return None
-        open_job.action_mark_done()
+        self._clear_problem(label)
         return result
+
+    def _problem_job(self, label):
+        return self.env["channel.job"].search(
+            [("store_id", "=", self.id), ("dedupe_key", "=", f"store:{label}"), ("state", "!=", "done")],
+            limit=1,
+        )
+
+    def _report_problem(self, label, exc):
+        """Show a problem that does not belong to one job; the same job is reused while it lasts."""
+        self.ensure_one()
+        job = self._problem_job(label) or self.env["channel.job"].create(
+            {
+                "name": _("Sync failed: %s", label.replace("_", " ")),
+                "store_id": self.id,
+                "job_type": "other",
+                "dedupe_key": f"store:{label}",
+            }
+        )
+        job._register_failure(exc)
+        job.write({"state": "failed", "retry_count": job.max_retries})
+
+    def _clear_problem(self, label):
+        self._problem_job(label).action_mark_done()
 
     # -- job dispatch ------------------------------------------------------------
 
@@ -425,7 +446,12 @@ class ChannelStore(models.Model):
         return self._dispatch("fetch_products")
 
     def _push_stock_levels(self, items):
+        """Send `items`; may return the `mapping_id`s the channel refused (the rest count as sent)."""
         return self._dispatch("push_stock_levels", items)
+
+    def _order_extra_vals(self, data):
+        """Connector specific values for a new sale.order."""
+        return self._dispatch("order_vals", data) if self._has_hook("order_vals") else {}
 
     def _push_fulfillment(self, picking):
         return self._dispatch("push_fulfillment", picking)

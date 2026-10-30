@@ -28,7 +28,8 @@ Subclass `channel.store` with `selection_add` on `channel_type` and implement th
 | `_test_connection()` | shop name (and refreshes locations) |
 | `_fetch_orders(since)` / `_fetch_order(id)` | normalised order dicts |
 | `_fetch_products()` | normalised product dicts |
-| `_push_stock_levels(items)` | nothing, raise `ChannelError` on failure |
+| `_push_stock_levels(items)` | `mapping_id`s the channel refused (the rest count as sent), or nothing; raise `ChannelError` on failure |
+| `_order_vals(data)` | optional: extra values for the new `sale.order` |
 | `_push_fulfillment(picking)` | nothing |
 | `_register_webhooks()`, `_verify_webhook()`, `_parse_webhook()` | webhook support |
 
@@ -36,6 +37,8 @@ Raise `ChannelError` for anything the user can fix (the message is shown as is) 
 credentials are rejected. Everything else is logged with its traceback on the job.
 
 Normalised order: `external_id, name, date, updated_at, cancelled, currency, email, phone, note, customer_id,
-billing, shipping, taxes_included, gateways, paid, fulfilled, lines[{external_id, name, sku, barcode, variant_id,
-inventory_ref, qty, price, discounted_price, taxes[{rate}]}], shipping_lines[{title, price, taxes}],
-refunds[{external_id, amount, lines[{line_id, sku, qty}]}]`. See `channel_shopify/models/channel_store.py`.
+billing, shipping, taxes_included, gateways, paid, fulfilled, channel_fulfilled (the channel ships it itself: taken
+from the store's *fulfilled warehouse* and booked as delivered), lines[{external_id, name, sku, barcode, variant_id,
+inventory_ref, qty, price, discounted_price, taxes[{rate}], push_stock}], shipping_lines[{title, price, taxes}], discount_lines[{title, price, taxes}] (order level, booked on the adjustment product),
+refunds[{external_id, amount, lines[{line_id, sku, qty}]}]`. A product variant may also carry `push_stock: False`
+(listings the channel stores and ships itself must never receive Odoo's stock). See `channel_shopify/models/channel_store.py`.

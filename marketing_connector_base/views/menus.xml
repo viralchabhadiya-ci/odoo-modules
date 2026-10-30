@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_marketing_connectors" name="Connected accounts" parent="mass_mailing.mass_mailing_menu_root" sequence="60"
+              groups="mass_mailing.group_mass_mailing_user"/>
+    <menuitem id="menu_marketing_accounts" name="Accounts" parent="menu_marketing_connectors" action="marketing_account_action" sequence="10"/>
+    <menuitem id="menu_marketing_campaigns" name="Campaign results" parent="menu_marketing_connectors" action="marketing_campaign_action" sequence="20"/>
+</odoo>

@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_marketing_account_user,marketing.account user,model_marketing_account,mass_mailing.group_mass_mailing_user,1,0,0,0
+access_marketing_account_manager,marketing.account manager,model_marketing_account,group_marketing_connector_manager,1,1,1,1
+access_marketing_list_link_user,marketing.list.link user,model_marketing_list_link,mass_mailing.group_mass_mailing_user,1,0,0,0
+access_marketing_list_link_manager,marketing.list.link manager,model_marketing_list_link,group_marketing_connector_manager,1,1,1,1
+access_marketing_member_user,marketing.member user,model_marketing_member,mass_mailing.group_mass_mailing_user,1,0,0,0
+access_marketing_member_manager,marketing.member manager,model_marketing_member,group_marketing_connector_manager,1,1,1,1
+access_marketing_campaign_user,marketing.campaign user,model_marketing_campaign,mass_mailing.group_mass_mailing_user,1,0,0,0
+access_marketing_campaign_manager,marketing.campaign manager,model_marketing_campaign,group_marketing_connector_manager,1,1,1,1
