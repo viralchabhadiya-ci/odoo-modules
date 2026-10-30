@@ -341,7 +341,7 @@ class TestBrevo(TransactionCase):
         link = self.synced_link()
         self.shop.contacts = {"ann@x.com": contact("ann@x.com"), "bob@x.com": contact("bob@x.com", cid=2)}
         self.sync()
-        self.shop.contacts["ann@x.com"] = contact("ann@x.com", blacklisted=True, modified="2026-10-30T10:00:00.000Z")
+        self.shop.contacts["ann@x.com"] = contact("ann@x.com", blacklisted=True, modified="2099-01-01T00:00:00.000Z")
         self.shop.calls.clear()
         body = json.dumps({"event": "unsubscribed", "email": "ann@x.com"}).encode()
         with patch(REQUEST, side_effect=self.shop):

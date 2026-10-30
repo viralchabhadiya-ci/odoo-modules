@@ -239,7 +239,7 @@ class TestMailchimp(TransactionCase):
         link = self.synced_link()
         self.shop.members["L1"] = [member("ann@x.com")]
         self.sync()
-        self.shop.members["L1"] = [member("ann@x.com", status="cleaned", changed="2026-10-30T10:00:00+00:00")]
+        self.shop.members["L1"] = [member("ann@x.com", status="cleaned", changed="2099-01-01T00:00:00+00:00")]
         self.sync()
         self.assertTrue(self.subscription("ann@x.com", link).opt_out)
 
@@ -485,7 +485,7 @@ class TestMailchimp(TransactionCase):
         link = self.synced_link()
         self.shop.members["L1"] = [member("ann@x.com")]
         self.sync()
-        self.shop.members["L1"] = [member("ann@x.com", status="unsubscribed", changed="2026-10-30T10:00:00+00:00")]
+        self.shop.members["L1"] = [member("ann@x.com", status="unsubscribed", changed="2099-01-01T00:00:00+00:00")]
         form = {"type": "unsubscribe", "data[list_id]": "L1", "data[email]": "ann@x.com"}
         with patch(REQUEST, side_effect=self.shop):
             self.account._handle_webhook(b"", form)
