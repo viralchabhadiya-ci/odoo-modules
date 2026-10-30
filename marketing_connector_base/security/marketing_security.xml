@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_groups_privilege_marketing_connector" model="res.groups.privilege">
+        <field name="name">Email Marketing Connectors</field>
+        <field name="sequence">41</field>
+        <field name="category_id" ref="base.module_category_marketing"/>
+    </record>
+
+    <record id="group_marketing_connector_manager" model="res.groups">
+        <field name="name">Administrator</field>
+        <field name="sequence">20</field>
+        <field name="privilege_id" ref="res_groups_privilege_marketing_connector"/>
+        <field name="implied_ids" eval="[(4, ref('mass_mailing.group_mass_mailing_user'))]"/>
+        <field name="user_ids" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+        <field name="comment">Can connect accounts, see the API key and choose which lists are synced.</field>
+    </record>
+
+    <data noupdate="1">
+        <record id="marketing_account_company_rule" model="ir.rule">
+            <field name="name">Marketing account: multi-company</field>
+            <field name="model_id" ref="model_marketing_account"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+    </data>
+</odoo>
