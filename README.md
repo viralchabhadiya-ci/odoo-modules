@@ -12,7 +12,15 @@ Connectors that link Odoo 19 (Community and Enterprise) with e-commerce platform
 | [`channel_ebay`](channel_ebay/readme/DESCRIPTION.md) | eBay REST (Sell Fulfillment + Inventory): orders, refunds, stock, shipments | ready, not yet run against a live account |
 | [`channel_magento`](channel_magento/readme/DESCRIPTION.md) | Magento 2 / Adobe Commerce REST: orders, credit memos, products, MSI stock, shipments | ready, not yet run against a live shop |
 
-Planned: Claude, QuickBooks, Power BI, Brevo, Mailchimp.
+Email marketing (independent of the sales channel modules):
+
+| Module | What it does | Status |
+|---|---|---|
+| [`marketing_connector_base`](marketing_connector_base/readme/DESCRIPTION.md) | Shared engine: audiences to mailing lists, contacts, unsubscribes both ways, campaign results, webhooks | ready |
+| [`marketing_mailchimp`](marketing_mailchimp/readme/DESCRIPTION.md) | Mailchimp Marketing API v3 | ready, not yet run against a live account |
+| [`marketing_brevo`](marketing_brevo/readme/DESCRIPTION.md) | Brevo API v3 | ready, not yet run against a live account |
+
+Planned: Claude, QuickBooks, Power BI.
 
 ## Design
 

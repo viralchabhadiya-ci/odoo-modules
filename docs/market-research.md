@@ -122,3 +122,23 @@ Where we beat the field:
 3. Credit memos become credit notes for the returned quantity only, even when the order itself did not change.
 4. One unknown SKU no longer fails a whole stock batch: it is found by retrying one by one and named.
 5. Missing API permissions are named in plain words (which resource) instead of "not authorized".
+
+## Mailchimp and Brevo (added 2026-10-29)
+
+Competitors (Odoo 19 listings): Mailchimp: TeqStars $393 (two-way contacts, live webhooks, e-commerce export, campaign stats,
+field mapping; needs the Sales and Invoicing apps, proprietary licence, no trial), Cybrosys (imports lists, members,
+templates and campaigns; needs the `mailchimp-marketing` Python package and a server restart; daily sync). Brevo: BrowseInfo
+$55 (imports and exports contacts, lists, campaigns; not for Odoo Online; a reviewer could not swap a wrongly bought version).
+Typical gaps: unsubscribe handling is not described as a rule, no view of contacts the provider refused, a package or
+restart to install, daily rather than frequent sync.
+
+What we build against: Mailchimp `lists/{id}/members` (`since_last_changed`), batch `POST lists/{id}` with `update_existing`,
+`reports`, list webhooks; Brevo `contacts/lists/{id}/contacts` (`modifiedSince`), `contacts/import`, list `remove`,
+`emailCampaigns`, marketing webhooks.
+Where we beat the field:
+1. Unsubscribes win in both directions and nobody is ever subscribed again behind their back.
+2. Only changes travel (fingerprint per contact), every 15 minutes, or within seconds with a webhook.
+3. Refused addresses are listed with the provider's reason, and retried when edited.
+4. No extra Python package, no restart, no dependency on Sales or Invoicing.
+5. One shared engine: the next provider is a small adapter.
+Not yet: e-commerce export to Mailchimp, templates, segments and tags, custom field mapping.
