@@ -2,6 +2,8 @@ import json
 
 from odoo import _, fields, models
 
+from .channel_error import ChannelError
+
 CHUNK = 100
 
 
@@ -83,14 +85,30 @@ class ChannelStore(models.Model):
 
     def _job_push_stock(self, job):
         items = job.get_payload()["items"]
-        self._push_stock_levels(items)
+        refused = set(self._push_stock_levels(items) or ())
         for item in items:
             mapping = self.env["channel.mapping"].browse(item["mapping_id"]).exists()
-            if not mapping:
+            if not mapping or item["mapping_id"] in refused:
                 continue
             last = mapping.get_last_stock()
             last[item["location"]] = item["qty"]
             mapping.last_stock = json.dumps(last)
+        if refused:
+            names = self.env["channel.mapping"].browse(list(refused)).exists().mapped("record_name")
+            # the job itself succeeded for the others, so the refusal is shown as its own problem
+            self._report_problem(
+                "stock_refused",
+                ChannelError(
+                    _(
+                        "The channel refused the stock of %(count)s product(s): %(names)s. "
+                        "They are offered again on the next stock update.",
+                        count=len(refused),
+                        names=", ".join(filter(None, names[:10])),
+                    )
+                ),
+            )
+        else:
+            self._clear_problem("stock_refused")
 
     # -- fulfillment ------------------------------------------------------------------
 

@@ -7,6 +7,10 @@ Connectors that link Odoo 19 (Community and Enterprise) with e-commerce platform
 | [`channel_connector_base`](channel_connector_base/readme/DESCRIPTION.md) | Shared engine: stores, job queue and sync log, order workflows, stock sync, webhooks, setup wizard | ready |
 | [`channel_shopify`](channel_shopify/readme/DESCRIPTION.md) | Shopify (Admin GraphQL API) | ready |
 | [`channel_woocommerce`](channel_woocommerce/readme/DESCRIPTION.md) | WooCommerce (REST API v3) | ready |
+| [`channel_amazon`](channel_amazon/readme/DESCRIPTION.md) | Amazon Selling Partner API (merchant-fulfilled and FBA orders) | ready, not yet run against a live seller account |
+| [`channel_prestashop`](channel_prestashop/readme/DESCRIPTION.md) | PrestaShop Webservice (orders, credit slips, combinations, stock, tracking) | ready, not yet run against a live shop |
+| [`channel_ebay`](channel_ebay/readme/DESCRIPTION.md) | eBay REST (Sell Fulfillment + Inventory): orders, refunds, stock, shipments | ready, not yet run against a live account |
+| [`channel_magento`](channel_magento/readme/DESCRIPTION.md) | Magento 2 / Adobe Commerce REST: orders, credit memos, products, MSI stock, shipments | ready, not yet run against a live shop |
 
 Email marketing (independent of the sales channel modules):
 
@@ -16,7 +20,7 @@ Email marketing (independent of the sales channel modules):
 | [`marketing_mailchimp`](marketing_mailchimp/readme/DESCRIPTION.md) | Mailchimp Marketing API v3 | ready, not yet run against a live account |
 | [`marketing_brevo`](marketing_brevo/readme/DESCRIPTION.md) | Brevo API v3 | ready, not yet run against a live account |
 
-Planned: Amazon, Claude, QuickBooks, PrestaShop, eBay, Power BI, Magento 2.
+Planned: Claude, QuickBooks, Power BI.
 
 ## Design
 
