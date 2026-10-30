@@ -207,8 +207,8 @@ class TestAmazon(AccountTestInvoicingCommon):
         self.assertEqual(order, again)
 
     def test_tax_rate_snaps_to_the_odoo_tax_it_adds_up_to(self):
-        self.assertEqual(self.store._amazon_snap_rate(19.98), 20.0)
-        self.assertEqual(self.store._amazon_snap_rate(7.0), 7.0)  # no Odoo tax is close: keep Amazon's figure
+        self.assertEqual(self.store._closest_tax_rate(19.98), 20.0)
+        self.assertEqual(self.store._closest_tax_rate(7.0), 7.0)  # no Odoo tax is close: keep Amazon's figure
 
     def test_orders_amazon_ships_itself_use_the_fba_warehouse_and_need_no_shipment(self):
         order = self._order(fulfillment={"fulfillmentStatus": "SHIPPED", "fulfilledBy": "AMAZON"})
