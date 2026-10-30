@@ -32,7 +32,11 @@ AI:
 |---|---|---|
 | [`claude_mcp_server`](claude_mcp_server/readme/DESCRIPTION.md) | Claude reads and (if allowed) updates Odoo through an MCP server: per-key models, record filters, audit log, daily limit | ready, not yet run with Claude itself |
 
-Planned: QuickBooks.
+Accounting:
+
+| Module | What it does | Status |
+|---|---|---|
+| [`quickbooks_connector`](quickbooks_connector/readme/DESCRIPTION.md) | QuickBooks Online: invoices, bills, credit notes and payments out; customers, vendors and payments in | ready, not yet run against QuickBooks itself |
 
 ## Design
 

@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_quickbooks_account_manager,quickbooks.account manager,model_quickbooks_account,group_quickbooks_manager,1,1,1,1
+access_quickbooks_ref_manager,quickbooks.ref manager,model_quickbooks_ref,group_quickbooks_manager,1,1,1,1
+access_quickbooks_link_manager,quickbooks.link manager,model_quickbooks_link,group_quickbooks_manager,1,1,1,1
+access_quickbooks_ref_user,quickbooks.ref accountant,model_quickbooks_ref,account.group_account_user,1,0,0,0
+access_quickbooks_token_none,quickbooks.token none,model_quickbooks_token,,0,0,0,0
