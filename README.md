@@ -10,8 +10,9 @@ Connectors that link Odoo 19 (Community and Enterprise) with e-commerce platform
 | [`channel_amazon`](channel_amazon/readme/DESCRIPTION.md) | Amazon Selling Partner API (merchant-fulfilled and FBA orders) | ready, not yet run against a live seller account |
 | [`channel_prestashop`](channel_prestashop/readme/DESCRIPTION.md) | PrestaShop Webservice (orders, credit slips, combinations, stock, tracking) | ready, not yet run against a live shop |
 | [`channel_ebay`](channel_ebay/readme/DESCRIPTION.md) | eBay REST (Sell Fulfillment + Inventory): orders, refunds, stock, shipments | ready, not yet run against a live account |
+| [`channel_magento`](channel_magento/readme/DESCRIPTION.md) | Magento 2 / Adobe Commerce REST: orders, credit memos, products, MSI stock, shipments | ready, not yet run against a live shop |
 
-Planned: Claude, QuickBooks, Power BI, Magento 2, Brevo, Mailchimp.
+Planned: Claude, QuickBooks, Power BI, Brevo, Mailchimp.
 
 ## Design
 

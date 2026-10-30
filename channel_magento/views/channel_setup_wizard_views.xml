@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="channel_setup_wizard_view_form_magento" model="ir.ui.view">
+        <field name="name">channel.setup.wizard.form.magento</field>
+        <field name="model">channel.setup.wizard</field>
+        <field name="inherit_id" ref="channel_connector_base.channel_setup_wizard_view_form"/>
+        <field name="arch" type="xml">
+            <group name="credentials" position="inside">
+                <field name="shop_url" string="Shop address" placeholder="https://shop.example.com" invisible="channel_type != 'magento'" required="channel_type == 'magento'"/>
+                <field name="access_token" string="Integration access token" password="True" invisible="channel_type != 'magento'"/>
+            </group>
+        </field>
+    </record>
+</odoo>
